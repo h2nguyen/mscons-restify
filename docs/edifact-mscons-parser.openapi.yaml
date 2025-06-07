@@ -1,0 +1,132 @@
+openapi: 3.1.0
+
+info:
+  title: MSCONSRestify - a Rest-API for parsing EDIFACT MSCONS messages
+  version: 1.204c.0
+  description: |
+    This [OpenAPI-Spezifikation](https://www.openapis.org/) describes the Rest-API of the EDIFACT MSCONS parser (MSCONSRestify),
+    parsing EDIFACT MSCONS messages (energy sector, DE/AT/CH) based on version [2.4c](https://bdew-mako.de/linkPdf/9645).
+  license:
+    name: Apache License, Version 2.0
+    url: https://github.com/h2nguyen/rest-api-mscons-parser/blob/main/LICENSE
+
+servers:
+  - url: http://0.0.0.0:{port}
+    description: Local server
+    variables:
+      port:
+        enum:
+          - "8000"
+        default: "8000"
+
+paths:
+  /parse-raw-format:
+    post:
+      summary: Trigger the process to parse the provided mscons messages as string format.
+      tags:
+        - MSCONS Parser
+      operationId: parse_mscons_raw_format
+      parameters:
+        - name: limit_mode
+          in: query
+          description: If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.
+          required: true
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        $ref: '#/components/requestBodies/MSCONSStringToParse'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The parsed mscons message
+                additionalProperties: true
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+components:
+  requestBodies:
+    MSCONSStringToParse:
+      description: The raw MSCONS message as plain text.
+      required: true
+      content:
+        text/plain:
+          schema:
+            type: string
+          examples:
+            insert_your_data:
+              summary: Insert your data ...
+              value: ""
+            mscons_sample:
+              summary: Raw MSCONS sample
+              value: |
+                UNA:+.? '
+                UNB+UNOC:3+4012345678901:14+4012345678901:14+200426:1151+ABC4711++TL++++1'
+                UNH+1+MSCONS:D:04B:UN:2.4c+UNB_DE0020_nr_1+1:C'
+                BGM+7+MSI5422+9'
+                DTM+137:202106011315?+00:303'
+                RFF+AGI:AFN9523'
+                DTM+293:20210601060030?+00:304'
+                NAD+MS+9920455302123::293'
+                CTA+IC+:P GETTY'
+                COM+no-reply@example.com:EM'
+                NAD+MR+4012345678901::9'
+                UNS+D'
+                NAD+DP'
+                LOC+237+11XUENBSOLS----X+11XVNBSOLS-----X'
+                DTM+163:202102012300?+00:303'
+                DTM+164:202102022300?+00:303'
+                LIN+1'
+                PIA+5+1-1?:1.29.1:SRW'
+                QTY+220:4250.465:D54'
+                DTM+163:202101012300?+00:303'
+                DTM+164:202101312315?+00:303'
+                QTY+220:4250.465:D54'
+                DTM+163:202101312315?+00:303'
+                DTM+164:202101312320?+00:303'
+                UNT+2+1'
+                UNZ+1+ABC4711'
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              mscons_input:
+                type: string
+                description: Raw MSCONS message
+          examples:
+            mscons_sample:
+              summary: Raw MSCONS sample
+              value: |
+                UNA:+.? '
+                UNB+UNOC:3+4012345678901:14+4012345678901:14+200426:1151+ABC4711++TL++++1'
+                UNH+1+MSCONS:D:04B:UN:2.4c+UNB_DE0020_nr_1+1:C'
+                BGM+7+MSI5422+9'
+                DTM+137:202106011315?+00:303'
+                RFF+AGI:AFN9523'
+                DTM+293:20210601060030?+00:304'
+                NAD+MS+9920455302123::293'
+                CTA+IC+:P GETTY'
+                COM+no-reply@example.com:EM'
+                NAD+MR+4012345678901::9'
+                UNS+D'
+                NAD+DP'
+                LOC+237+11XUENBSOLS----X+11XVNBSOLS-----X'
+                DTM+163:202102012300?+00:303'
+                DTM+164:202102022300?+00:303'
+                LIN+1'
+                PIA+5+1-1?:1.29.1:SRW'
+                QTY+220:4250.465:D54'
+                DTM+163:202101012300?+00:303'
+                DTM+164:202101312315?+00:303'
+                QTY+220:4250.465:D54'
+                DTM+163:202101312315?+00:303'
+                DTM+164:202101312320?+00:303'
+                UNT+2+1'
+                UNZ+1+ABC4711'

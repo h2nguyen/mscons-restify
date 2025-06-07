@@ -1,0 +1,23 @@
+# coding: utf-8
+"""
+Package for segment handlers.
+"""
+from msconsparser.libs.edifactmsconsparser.handlers.segment_handler import SegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.segment_handler_factory import SegmentHandlerFactory
+from msconsparser.libs.edifactmsconsparser.handlers.bgm_segment_handler import BGMSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.cci_segment_handler import CCISegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.com_segment_handler import COMSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.cta_segment_handler import CTASegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.dtm_segment_handler import DTMSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.lin_segment_handler import LINSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.loc_segment_handler import LOCSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.nad_segment_handler import NADSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.pia_segment_handler import PIASegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.qty_segment_handler import QTYSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.rff_segment_handler import RFFSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.sts_segment_handler import STSSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unb_segment_handler import UNBSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unh_segment_handler import UNHSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.uns_segment_handler import UNSSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unt_segment_handler import UNTSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unz_segment_handler import UNZSegmentHandler
