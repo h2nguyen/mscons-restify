@@ -20,8 +20,20 @@ router endpoints) while the core business logic is manually created following a 
 
 1. **Python Version**: This project requires Python 3.9 or higher.
 
-2. **Dependencies Installation**:
-   > NOTE: Please execute the following from the root directory!
+2. **Virtual Environment Setup**:
+   ```bash
+   # Create a virtual environment named .venv
+   python -m venv .venv
+
+   # Activate the virtual environment
+   # On Windows:
+   .venv\Scripts\activate
+   # On macOS/Linux:
+   source .venv/bin/activate
+   ```
+
+3. **Dependencies Installation**:
+   > NOTE: Please execute the following from the root directory with the virtual environment activated!
 
    ```bash
    # Install uv if not already installed

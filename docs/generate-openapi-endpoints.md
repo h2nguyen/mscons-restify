@@ -47,7 +47,7 @@ After generating the API endpoints, you may need to:
 
 > **IMPORTANT NOTE:**
 > 
-> The OpenAPI generator for `python-fastapi` is currently in beta phase and has a known limitation 
+> The OpenAPI generator for `python-fastapi` is currently in beta phase and has a known limitation (bug)
 > where the request body media-type `text/plain` is not properly rendered in the Swagger-UI. As a workaround, the
 > required media-type configuration
 > ```
@@ -56,6 +56,11 @@ After generating the API endpoints, you may need to:
 > ) -> Dict[str, object]:
 > ```
 > has been manually added in
-> [**mscons_parser_api.py**](../src/msconsparser/adapters/inbound/rest/apis/mscons_parser_api.py),
-> which is why this file is included in version control. Once this issue is resolved in a future release of the OpenAPI generator, 
-> this file should be excluded from version control and generated automatically.
+> [**mscons_parser_api.py**](../src/msconsparser/adapters/inbound/rest/apis/mscons_parser_api.py) as well as the
+> `examples preview`, which is why this file is included in version control. Once this issue is resolved in a future
+> release of the OpenAPI generator, this file should be excluded from version control and generated automatically.
+>
+> **IMPORTANT:** After generating the files from the provided OpenAPI specification
+> [**edifact-mscons-parser.openapi.yaml**](edifact-mscons-parser.openapi.yaml),
+> the [**mscons_parser_api.py**](../src/msconsparser/adapters/inbound/rest/apis/mscons_parser_api.py) file needs to be
+> rollbacked, since the generation process overwrites the existing file. This is necessary due to the aforementioned bug.
