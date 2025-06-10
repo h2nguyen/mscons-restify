@@ -6,7 +6,7 @@ from enum import Enum
 
 # --- Fallback implementation for StrEnum for Python < 3.11 ---
 if sys.version_info >= (3, 11):
-    pass
+    from enum import StrEnum
 else:
     class StrEnum(str, Enum):
         """
