@@ -28,7 +28,7 @@ router endpoints) while the core business logic is manually created following a 
    # Activate the virtual environment
    # On Windows:
    #.venv\Scripts\activate
-   
+
    # On macOS/Linux:
    source .venv/bin/activate
    ```

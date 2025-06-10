@@ -50,6 +50,36 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden
+  /parse-raw-file:
+    post:
+      summary: Trigger the process to parse the provided mscons messages from a text file.
+      tags:
+        - MSCONS Parser
+      operationId: parse_mscons_file
+      parameters:
+        - name: limit_mode
+          in: query
+          description: If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.
+          required: true
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        $ref: '#/components/requestBodies/MSCONSFileToParse'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The parsed mscons message
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
   /download-parsed-raw-format:
     post:
       summary: Trigger the process to parse the provided mscons messages as string format and download the result as a JSON file.
@@ -58,6 +88,33 @@ paths:
       operationId: download_parsed_result
       requestBody:
         $ref: '#/components/requestBodies/MSCONSStringToParse'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename=mscons_parsed_20250531_235959.json
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The parsed mscons message as a downloadable JSON file
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /download-parsed-raw-file:
+    post:
+      summary: Trigger the process to parse the provided mscons messages as file and download the result as a JSON file.
+      tags:
+        - MSCONS Parser
+      operationId: download_parsed_file_result
+      requestBody:
+        $ref: '#/components/requestBodies/MSCONSFileToParse'
       responses:
         '201':
           description: Created
@@ -119,40 +176,11 @@ components:
                 DTM+164:202101312320?+00:303'
                 UNT+2+1'
                 UNZ+1+ABC4711'
-        multipart/form-data:
+    MSCONSFileToParse:
+      description: The raw MSCONS message as a file.
+      required: true
+      content:
+        application/octet-stream:
           schema:
-            type: object
-            properties:
-              mscons_input:
-                type: string
-                description: Raw MSCONS message
-          examples:
-            mscons_sample:
-              summary: Raw MSCONS sample
-              value: |
-                UNA:+.? '
-                UNB+UNOC:3+4012345678901:14+4012345678901:14+200426:1151+ABC4711++TL++++1'
-                UNH+1+MSCONS:D:04B:UN:2.4c+UNB_DE0020_nr_1+1:C'
-                BGM+7+MSI5422+9'
-                DTM+137:202106011315?+00:303'
-                RFF+AGI:AFN9523'
-                DTM+293:20210601060030?+00:304'
-                NAD+MS+9920455302123::293'
-                CTA+IC+:P GETTY'
-                COM+no-reply@example.com:EM'
-                NAD+MR+4012345678901::9'
-                UNS+D'
-                NAD+DP'
-                LOC+237+11XUENBSOLS----X+11XVNBSOLS-----X'
-                DTM+163:202102012300?+00:303'
-                DTM+164:202102022300?+00:303'
-                LIN+1'
-                PIA+5+1-1?:1.29.1:SRW'
-                QTY+220:4250.465:D54'
-                DTM+163:202101012300?+00:303'
-                DTM+164:202101312315?+00:303'
-                QTY+220:4250.465:D54'
-                DTM+163:202101312315?+00:303'
-                DTM+164:202101312320?+00:303'
-                UNT+2+1'
-                UNZ+1+ABC4711'
+            type: string
+            format: binary
