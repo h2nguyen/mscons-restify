@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from typing import Dict, List  # noqa: F401
+from typing import Dict, List, Optional, Union, Tuple  # noqa: F401
 import importlib
 import pkgutil
 
@@ -25,7 +25,7 @@ from fastapi import (  # noqa: F401
 )
 
 from msconsparser.adapters.inbound.rest.models.extra_models import TokenModel  # noqa: F401
-from pydantic import Field, StrictBool, StrictStr
+from pydantic import Field, StrictBool, StrictBytes, StrictStr
 from typing_extensions import Annotated
 
 
@@ -98,6 +98,27 @@ UNZ+1+ABC4711'"""
         raise HTTPException(status_code=500, detail="Not implemented")
     return await BaseMSCONSParserApi.subclasses[0]().download_parsed_result(body)
 
+@router.post(
+    "/parse-raw-file",
+    responses={
+        200: {"model": object, "description": "OK"},
+        400: {"description": "Bad request"},
+        401: {"description": "Unauthorized"},
+        403: {"description": "Forbidden"},
+    },
+    tags=["MSCONS Parser"],
+    summary="Trigger the process to parse the provided mscons messages from a text file.",
+    response_model_by_alias=True,
+)
+async def parse_mscons_file(
+    limit_mode: Annotated[StrictBool, Field(description="If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.")] = Query(True, description="If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.", alias="limit_mode"),
+    body: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="The raw MSCONS message as a file.")] = Body(None, description="The raw MSCONS message as a file.", media_type="application/octet-stream"),
+) -> object:
+    if not BaseMSCONSParserApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseMSCONSParserApi.subclasses[0]().parse_mscons_file(limit_mode, body)
+
+
 
 @router.post(
     "/parse-raw-format",
@@ -161,3 +182,22 @@ UNZ+1+ABC4711'"""
     if not BaseMSCONSParserApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
     return await BaseMSCONSParserApi.subclasses[0]().parse_mscons_raw_format(limit_mode, body)
+
+@router.post(
+    "/download-parsed-raw-file",
+    responses={
+        201: {"model": object, "description": "Created"},
+        400: {"description": "Bad request"},
+        401: {"description": "Unauthorized"},
+        403: {"description": "Forbidden"},
+    },
+    tags=["MSCONS Parser"],
+    summary="Trigger the process to parse the provided mscons messages as file and download the result as a JSON file.",
+    response_model_by_alias=True,
+)
+async def download_parsed_file_result(
+    body: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="The raw MSCONS message as a file.")] = Body(None, description="The raw MSCONS message as a file.", media_type="application/octet-stream"),
+) -> object:
+    if not BaseMSCONSParserApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseMSCONSParserApi.subclasses[0]().download_parsed_file_result(body)
