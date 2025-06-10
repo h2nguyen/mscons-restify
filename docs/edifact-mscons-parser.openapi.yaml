@@ -1,8 +1,8 @@
-openapi: 3.1.0
+openapi: 3.1.1
 
 info:
   title: MSCONSRestify - a Rest-API for parsing EDIFACT MSCONS messages
-  version: 1.204c.0
+  version: 1.204c.1
   description: |
     This [OpenAPI-Spezifikation](https://www.openapis.org/) describes the Rest-API of the EDIFACT MSCONS parser (MSCONSRestify),
     parsing EDIFACT MSCONS messages (energy sector, DE/AT/CH) based on version [2.4c](https://bdew-mako.de/linkPdf/9645).
@@ -44,7 +44,33 @@ paths:
               schema:
                 type: object
                 description: The parsed mscons message
-                additionalProperties: true
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /download-parsed-raw-format:
+    post:
+      summary: Trigger the process to parse the provided mscons messages as string format and download the result as a JSON file.
+      tags:
+        - MSCONS Parser
+      operationId: download_parsed_result
+      requestBody:
+        $ref: '#/components/requestBodies/MSCONSStringToParse'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename=mscons_parsed_20250531_235959.json
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The parsed mscons message as a downloadable JSON file
         '400':
           description: Bad request
         '401':
