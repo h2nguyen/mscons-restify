@@ -57,7 +57,7 @@ class SegmentConverter(ABC, Generic[T]):
             return self._convert_internal(element_components, last_segment_type, current_segment_group)
         except Exception as ex:
             # Service-Meldungen: CONTRL – Syntax-Prüfung und Rückmeldung über Ankunft der Meldung (Syntax- und Servicereport-Meldungen für
-            error_message = f"CONTRL -> l{line_number} -> {element_components} -> {ex}"
+            error_message = f"CONTRL -> L{line_number} -> {element_components} -> {ex}"
             logger.error(error_message)
             raise CONTRLException(message=error_message)
 
