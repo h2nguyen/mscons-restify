@@ -9,17 +9,25 @@ class MSCONSUtils:
     release indicators (escape characters). It also includes methods for splitting
     strings according to EDIFACT syntax rules, respecting escape sequences.
 
+    The default delimiters can be overridden by a UNA segment (Service String Advice)
+    at the beginning of an EDIFACT message.
+
     Attributes:
-        SEGMENT_TERMINATOR: Character that marks the end of a segment.
-        ELEMENT_SEPARATOR: Character that separates elements within a segment.
         COMPONENT_SEPARATOR: Character that separates components within an element.
+        ELEMENT_SEPARATOR: Character that separates elements within a segment.
+        DECIMAL_MARK: Character that specifies a decimal point in a numeric value, e.g. "2.1" or "2,1".
         RELEASE_INDICATOR: Escape character used to include special characters in data, e.g. "+" or ":".
+        RESERVED_INDICATOR: Character that marks reserved use of a component, currently it must be a space.
+        SEGMENT_TERMINATOR: Character that marks the end of a segment.
     """
 
-    SEGMENT_TERMINATOR = "'"
-    ELEMENT_SEPARATOR = "+"
+    # Default delimiters according to EDIFACT standard
     COMPONENT_SEPARATOR = ":"
+    ELEMENT_SEPARATOR = "+"
+    DECIMAL_MARK = "."
     RELEASE_INDICATOR = "?"
+    RESERVED_INDICATOR = " "
+    SEGMENT_TERMINATOR = "'"
 
     @staticmethod
     def split_segments(string_content: str) -> list[str]:

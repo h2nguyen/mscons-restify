@@ -20,3 +20,4 @@ from msconsparser.libs.edifactmsconsparser.converters.unh_segment_converter impo
 from msconsparser.libs.edifactmsconsparser.converters.uns_segment_converter import UNSSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.unt_segment_converter import UNTSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.unz_segment_converter import UNZSegmentConverter
+from msconsparser.libs.edifactmsconsparser.converters.una_segment_converter import UNASegmentConverter

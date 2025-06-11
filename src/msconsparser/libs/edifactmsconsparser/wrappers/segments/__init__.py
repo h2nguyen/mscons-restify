@@ -28,7 +28,7 @@ from msconsparser.libs.edifactmsconsparser.wrappers.segments.message import (
 )
 # Import message structure models
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.message_structure import (
-    EdifactMSconsMessage, EdifactInterchange
+    EdifactMSconsMessage, EdifactInterchange, SegmentUNA
 )
 # Import partner models
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.partner import (

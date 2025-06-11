@@ -27,20 +27,35 @@ The mscons-restify application follows a hexagonal architecture with clear separ
 ### Flow of the Parsing Process
 
 1. The raw EDIFACT text is passed to the `EdifactMSCONSParser.parse()` method
-2. The parser splits the text into segments using `MSCONSUtils.split_segments()`
-3. For each segment:
+2. The parser checks if the text starts with a UNA segment (Service String Advice)
+   - If a UNA segment is found, it's extracted and processed to set custom delimiters
+   - The UNA segment is removed from the text to avoid processing it again
+3. The parser splits the text into segments using `MSCONSUtils.split_segments()`
+4. For each segment:
    - The segment type is determined from the first element
    - The segment group is determined based on the segment type and current context
    - A handler for the segment type is retrieved from the `SegmentHandlerFactory`
    - The handler uses its converter to transform the segment data into a context object
    - The handler updates the parsing context with the converted segment
-4. The parser returns the completed `EdifactInterchange` object
+5. The parser returns the completed `EdifactInterchange` object
 
 ## Segment Types
 
 EDIFACT MSCONS messages consist of various segment types, each with a specific purpose:
 
 - **UNA**: Service String Advice - Defines EDIFACT separators
+  - Optional header at the beginning of an EDIFACT message
+  - Always exactly 9 characters long
+  - Each position has a specific meaning:
+    - Position 1-3: Segment tag "UNA"
+    - Position 4: Component data element separator (default: ":")
+    - Position 5: Data element separator (default: "+")
+    - Position 6: Decimal notation mark (default: ".")
+    - Position 7: Release character/escape (default: "?")
+    - Position 8: Reserved (usually space)
+    - Position 9: Segment terminator (default: "'")
+  - When present, overrides the default delimiters defined by the EDIFACT standard
+  - Example: UNA:+.? '
 - **UNB/UNZ**: Interchange Header/Trailer - Encloses the data exchange
 - **UNH/UNT**: Message Header/Trailer - Encloses a MSCONS message
 - **BGM**: Beginning of Message - Message type/reference
@@ -183,6 +198,22 @@ To extend the parser to support new segment types or modify existing behavior:
 5. Implement a handler for the segment that extends `SegmentHandler` in the `libs/edifactmsconsparser/handlers` directory
 6. Register the handler in `SegmentHandlerFactory.__register_handlers()` in `libs/edifactmsconsparser/handlers/segment_handler_factory.py`
 7. Update the `get_segment_group()` method in `EdifactMSCONSParser` in `libs/edifactmsconsparser/edifact_mscons_parser.py` if the segment affects segment group determination
+
+### Handling Special Segments
+
+Some segments, like UNA (Service String Advice), require special handling:
+
+1. **UNA Segment**: The UNA segment defines the delimiters used in the EDIFACT message and must be processed before any other segments.
+   - The parser checks for a UNA segment at the beginning of the file before splitting the text into segments
+   - If found, it extracts the UNA segment, processes it to set custom delimiters, and removes it from the text
+   - The UNA segment handler updates the MSCONSUtils delimiters with the custom delimiters from the UNA segment
+   - This ensures that all subsequent segments are parsed correctly using the custom delimiters
+
+For segments that require special handling:
+
+1. Implement the special handling logic in the `parse()` method of `EdifactMSCONSParser`
+2. Ensure that the segment handler updates any necessary global state (e.g., delimiters)
+3. Add appropriate tests to verify the special handling logic
 
 ## Conclusion
 

@@ -1,4 +1,12 @@
 {
+  "una_service_string_advice": {
+    "component_separator": ":",
+    "element_separator": "+",
+    "decimal_mark": ".",
+    "release_character": "?",
+    "reserved": " ",
+    "segment_terminator": "'"
+  },
   "unb_nutzdaten_kopfsegment": {
     "syntax_bezeichner": {
       "syntax_kennung": "UNOC",

@@ -22,11 +22,11 @@ def test_parse_mscons_file(client: TestClient):
     with open(mscons_file_path, "rb") as f:
         file_content = f.read()
 
-    # Create a file upload request
-    files = {"mscons_file": ("mscons-message-example.txt", file_content, "text/plain")}
+    # Send the file content directly in the request body
     response = client.post(
         "/parse-raw-file",
-        files=files,
+        content=file_content,
+        headers={"Content-Type": "application/octet-stream"}
     )
 
     # Check that the response status code is 200

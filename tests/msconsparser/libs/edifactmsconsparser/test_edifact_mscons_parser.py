@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 
 from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType, SegmentGroup, EdifactInterchange
 from msconsparser.libs.edifactmsconsparser.edifact_mscons_parser import EdifactMSCONSParser
+from msconsparser.libs.edifactmsconsparser.utils.mscons_utils import MSCONSUtils
 
 
 class TestEdifactMSCONSParser(unittest.TestCase):
@@ -157,6 +158,56 @@ class TestEdifactMSCONSParser(unittest.TestCase):
 
         # Assert
         self.assertEqual(None, result)
+
+    def test_parse_with_una_segment(self):
+        """Test parsing with a UNA segment at the beginning of the file."""
+        # Save original delimiters
+        original_component_separator = MSCONSUtils.COMPONENT_SEPARATOR
+        original_element_separator = MSCONSUtils.ELEMENT_SEPARATOR
+        original_release_indicator = MSCONSUtils.RELEASE_INDICATOR
+        original_segment_terminator = MSCONSUtils.SEGMENT_TERMINATOR
+
+        try:
+            # Arrange
+            sample_data = "UNA;*%? 'UNB*UNOC;3*SENDER;ZZ*RECIPIENT;ZZ*230101;1200*12345'"
+
+            # Act
+            result = self.parser.parse(sample_data)
+
+            # Assert
+            self.assertIsNotNone(result)
+            self.assertIsInstance(result, EdifactInterchange)
+            self.assertIsNotNone(result.una_service_string_advice)
+            self.assertEqual(";", result.una_service_string_advice.component_separator)
+            self.assertEqual("*", result.una_service_string_advice.element_separator)
+            self.assertEqual("%", result.una_service_string_advice.decimal_mark)
+            self.assertEqual("?", result.una_service_string_advice.release_character)
+            self.assertEqual(" ", result.una_service_string_advice.reserved)
+            self.assertEqual("'", result.una_service_string_advice.segment_terminator)
+
+            # Verify that MSCONSUtils delimiters were updated
+            self.assertEqual(";", MSCONSUtils.COMPONENT_SEPARATOR)
+            self.assertEqual("*", MSCONSUtils.ELEMENT_SEPARATOR)
+            self.assertEqual("?", MSCONSUtils.RELEASE_INDICATOR)
+            self.assertEqual("'", MSCONSUtils.SEGMENT_TERMINATOR)
+
+            # Verify that the UNB segment was correctly parsed with the new delimiters
+            self.assertIsNotNone(result.unb_nutzdaten_kopfsegment)
+            self.assertEqual("UNOC", result.unb_nutzdaten_kopfsegment.syntax_bezeichner.syntax_kennung)
+            self.assertEqual("3", result.unb_nutzdaten_kopfsegment.syntax_bezeichner.syntax_versionsnummer)
+            self.assertEqual("SENDER", result.unb_nutzdaten_kopfsegment.absender_der_uebertragungsdatei.marktpartneridentifikationsnummer)
+            self.assertEqual("ZZ", result.unb_nutzdaten_kopfsegment.absender_der_uebertragungsdatei.teilnehmerbezeichnung_qualifier)
+            self.assertEqual("RECIPIENT", result.unb_nutzdaten_kopfsegment.empfaenger_der_uebertragungsdatei.marktpartneridentifikationsnummer)
+            self.assertEqual("ZZ", result.unb_nutzdaten_kopfsegment.empfaenger_der_uebertragungsdatei.teilnehmerbezeichnung_qualifier)
+            self.assertEqual("230101", result.unb_nutzdaten_kopfsegment.datum_uhrzeit_der_erstellung.datum)
+            self.assertEqual("1200", result.unb_nutzdaten_kopfsegment.datum_uhrzeit_der_erstellung.uhrzeit)
+            self.assertEqual("12345", result.unb_nutzdaten_kopfsegment.datenaustauschreferenz)
+        finally:
+            # Restore original delimiters
+            MSCONSUtils.COMPONENT_SEPARATOR = original_component_separator
+            MSCONSUtils.ELEMENT_SEPARATOR = original_element_separator
+            MSCONSUtils.RELEASE_INDICATOR = original_release_indicator
+            MSCONSUtils.SEGMENT_TERMINATOR = original_segment_terminator
 
 
 if __name__ == '__main__':

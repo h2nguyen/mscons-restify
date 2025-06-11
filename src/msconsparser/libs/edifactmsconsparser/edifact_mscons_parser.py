@@ -36,6 +36,8 @@ class EdifactMSCONSParser:
         if edifact_text is None:
             raise MSCONSParserException("No valid parsing input. Input was", str(edifact_text))
 
+        edifact_text = self.__extract_and_process_una_segment(edifact_text)
+
         segments = MSCONSUtils.split_segments(edifact_text)
         amount_of_segments = len(segments)
 
@@ -80,6 +82,27 @@ class EdifactMSCONSParser:
             last_segment_type = segment_type
 
         return self.__context.interchange
+
+    def __extract_and_process_una_segment(self, edifact_text):
+        # Check for UNA segment at the beginning of the file
+        if edifact_text.startswith(SegmentType.UNA):
+            # Extract the UNA segment (always 9 characters long)
+            una_segment = edifact_text[:9]
+
+            # Process the UNA segment to set the delimiters
+            una_handler = self.__handler_factory.get_handler(SegmentType.UNA)
+            if una_handler:
+                una_handler.handle(
+                    line_number=1,
+                    element_components=[una_segment],
+                    last_segment_type=None,
+                    current_segment_group=None,
+                    context=self.__context
+                )
+
+            # Remove the UNA segment from the text to avoid processing it again
+            edifact_text = edifact_text[9:]
+        return edifact_text
 
     @staticmethod
     def get_segment_group(

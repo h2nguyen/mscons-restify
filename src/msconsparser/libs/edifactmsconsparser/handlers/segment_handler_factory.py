@@ -18,6 +18,7 @@ from msconsparser.libs.edifactmsconsparser.handlers.pia_segment_handler import P
 from msconsparser.libs.edifactmsconsparser.handlers.qty_segment_handler import QTYSegmentHandler
 from msconsparser.libs.edifactmsconsparser.handlers.rff_segment_handler import RFFSegmentHandler
 from msconsparser.libs.edifactmsconsparser.handlers.sts_segment_handler import STSSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.una_segment_handler import UNASegmentHandler
 from msconsparser.libs.edifactmsconsparser.handlers.unb_segment_handler import UNBSegmentHandler
 from msconsparser.libs.edifactmsconsparser.handlers.unh_segment_handler import UNHSegmentHandler
 from msconsparser.libs.edifactmsconsparser.handlers.uns_segment_handler import UNSSegmentHandler
@@ -45,6 +46,7 @@ class SegmentHandlerFactory:
         """
         # Initialize handlers for each segment type
         self.__handlers = {
+            SegmentType.UNA: UNASegmentHandler(),
             SegmentType.UNB: UNBSegmentHandler(),
             SegmentType.UNH: UNHSegmentHandler(),
             SegmentType.BGM: BGMSegmentHandler(),

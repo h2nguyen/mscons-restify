@@ -105,6 +105,12 @@ To run the server on a Docker container, please execute the following from the r
 
    This will start the service on port 8000, which maps to the internal port 8000.
 
+
+> **Performance Optimization**:
+> 
+> The project is configured to use Docker Compose's bake feature for better build performance.
+> This is enabled by the `COMPOSE_BAKE=true` environment variable in the `.env` file. No additional action is required.
+
 ## Testing Information
 
 ### Running Tests
