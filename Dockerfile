@@ -1,34 +1,69 @@
-FROM python:3.9 AS builder
+# Use Red Hat UBI8 as base image
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest AS base
+
+# Install Python 3.9
+RUN microdnf install -y python39 python39-pip && \
+    microdnf clean all
+
+# Builder stage
+FROM base AS builder
 
 WORKDIR /usr/src/app
 
-RUN python3 -m venv /venv
+# Create virtual environment and install uv
+RUN python3.9 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install uv
+
 ENV PATH="/venv/bin:$PATH"
 
-RUN pip install --upgrade pip uv
+# Copy only necessary files for installation
+COPY pyproject.toml LICENSE.txt README.md ./
+COPY src src/
 
-COPY . .
-RUN uv pip install --no-cache-dir -e .
+# Install application dependencies using uv
+RUN uv pip install --no-cache-dir .
 
+# Test stage (independent from runtime stage)
+FROM base AS test_runner
 
-FROM python:3.9 AS test_runner
-WORKDIR /tmp
+WORKDIR /usr/src/app
+
+# Create a new virtual environment for testing
+RUN python3.9 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install uv
+
+ENV PATH="/venv/bin:$PATH"
+
+# Copy application code and test files
+COPY pyproject.toml LICENSE.txt README.md ./
+COPY src src/
+COPY tests tests/
+
+# Install dependencies including dev dependencies using uv
+RUN uv pip install --no-cache-dir ".[dev]"
+
+# Run tests
+RUN uv run -m pytest tests
+
+# Runtime stage (minimal and performant)
+FROM base AS service
+
+WORKDIR /app
+
+# Set up environment variables
+ENV PATH="/venv/bin:$PATH"
+
+# Copy the virtual environment from the builder stage
 COPY --from=builder /venv /venv
-COPY --from=builder /usr/src/app/tests tests
-COPY --from=builder /usr/src/app/src src
-COPY --from=builder /usr/src/app/pyproject.toml pyproject.toml
-COPY --from=builder /usr/src/app/LICENSE.txt LICENSE.txt
-COPY --from=builder /usr/src/app/README.md README.md
-ENV PATH=/venv/bin:$PATH
 
-# install test dependencies
-RUN pip install uv && uv pip install ".[dev]"
+# Copy only the application code needed for runtime
+COPY --from=builder /usr/src/app/src/msconsparser ./msconsparser
 
-# run tests
-RUN pytest tests
+# Copy necessary files for runtime
+COPY pyproject.toml LICENSE.txt README.md ./
 
-
-FROM python:3.9 AS service
-WORKDIR /root/app/site-packages
-COPY --from=test_runner /venv /venv
-ENV PATH=/venv/bin:$PATH
+# Set the entrypoint to run the application
+EXPOSE 8000
+CMD ["uvicorn", "msconsparser.main:app", "--host", "0.0.0.0", "--port", "8000"]
