@@ -2,9 +2,11 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.exceptions import CONTRLException
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentUNA
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.exceptions import CONTRLException
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentUNA
 
 
 class UNASegmentConverter(SegmentConverter[SegmentUNA]):
@@ -15,14 +17,21 @@ class UNASegmentConverter(SegmentConverter[SegmentUNA]):
     used as delimiters in the EDIFACT message.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the UNA segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentUNA:
         """
         Converts UNA (Service String Advice) segment to a SegmentUNA object.
@@ -34,6 +43,7 @@ class UNASegmentConverter(SegmentConverter[SegmentUNA]):
             element_components: List of segment components (should be a single string "UNA:+.? '")
             last_segment_type: The type of the previous segment (should be None as UNA is typically the first segment)
             current_segment_group: The current segment group being processed (should be None)
+            context: The context to use for the converter.
 
         Returns:
             SegmentUNA object with the delimiter characters defined in the UNA segment

@@ -1,7 +1,9 @@
 import unittest
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNT
 from msconsparser.libs.edifactmsconsparser.converters import UNTSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNT
 
 
 class TestUNTSegmentConverter(unittest.TestCase):
@@ -9,7 +11,9 @@ class TestUNTSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = UNTSegmentConverter()
+        self.context = ParsingContext()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = UNTSegmentConverter(syntax_parser=self.syntax_parser)
 
     def test_convert_internal(self):
         """Test the _convert_internal method."""
@@ -19,7 +23,12 @@ class TestUNTSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNT)
@@ -36,7 +45,13 @@ class TestUNTSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
     def test_convert_with_invalid_segment_count(self):
         """Test the convert method with invalid segment count."""
@@ -48,7 +63,13 @@ class TestUNTSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
 
 if __name__ == '__main__':

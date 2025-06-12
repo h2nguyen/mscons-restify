@@ -2,6 +2,7 @@
 """
 Package for segment handlers.
 """
+
 from msconsparser.libs.edifactmsconsparser.handlers.segment_handler import SegmentHandler
 from msconsparser.libs.edifactmsconsparser.handlers.segment_handler_factory import SegmentHandlerFactory
 from msconsparser.libs.edifactmsconsparser.handlers.bgm_segment_handler import BGMSegmentHandler

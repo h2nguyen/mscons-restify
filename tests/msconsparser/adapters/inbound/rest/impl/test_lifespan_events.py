@@ -14,10 +14,10 @@ class TestLifespanEvents(unittest.TestCase):
         async with startup_lifespan():
             # Check that the logger was called with the expected message
             mock_logger.info.assert_called_once_with("App startup")
-            
+
             # This code runs inside the context manager, after yield
             pass
-        
+
         # No additional assertions needed after the context manager exits
         # The test passes if no exceptions are raised
 

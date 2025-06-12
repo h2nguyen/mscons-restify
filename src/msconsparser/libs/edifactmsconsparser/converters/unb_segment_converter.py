@@ -2,21 +2,39 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentUNB, SyntaxBezeichner, Marktpartner, DatumUhrzeit
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
-from msconsparser.libs.edifactmsconsparser.utils import MSCONSUtils
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import (
+    SegmentGroup, SegmentUNB, SyntaxBezeichner, Marktpartner, DatumUhrzeit
+)
 
 
 class UNBSegmentConverter(SegmentConverter[SegmentUNB]):
+    """
+    Converter for UNB (Interchange Header) segments.
 
-    def __init__(self):
-        pass
+    This converter transforms UNB segment data from EDIFACT format into a structured
+    SegmentUNB object. The UNB segment identifies an interchange and contains the 
+    sender and recipient identification, date and time of preparation, and interchange 
+    control reference.
+    """
+
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the UNB segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentUNB:
         """
         Converts UNB (Interchange Header) segment components to a SegmentUNB object.
@@ -28,6 +46,7 @@ class UNBSegmentConverter(SegmentConverter[SegmentUNB]):
             element_components: List of segment components
             last_segment_type: The type of the previous segment
             current_segment_group: The current segment group being processed
+            context: The context to use for the converter.
 
         Returns:
             SegmentUNB object with syntax identifier, sender, recipient, creation date/time, 
@@ -36,31 +55,31 @@ class UNBSegmentConverter(SegmentConverter[SegmentUNB]):
         Example:
         UNB+UNOC:3+4012345678901:14+4012345678901:14+200426:1151+ABC4711++TL++++1'
         """
-        syntax_info = MSCONSUtils.split_components(
+        syntax_info = self._syntax_parser.split_components(
             string_content=element_components[1]
         )
 
-        absender_info = MSCONSUtils.split_components(
+        absender_info = self._syntax_parser.split_components(
             string_content=element_components[2]
         )
 
-        empfaenger_info = MSCONSUtils.split_components(
+        empfaenger_info = self._syntax_parser.split_components(
             string_content=element_components[3]
         )
 
-        erstellung_info = MSCONSUtils.split_components(
+        erstellung_info = self._syntax_parser.split_components(
             string_content=element_components[4]
         )
 
-        datenaustauschreferenz = MSCONSUtils.split_components(
+        datenaustauschreferenz = self._syntax_parser.split_components(
             string_content=element_components[5]
         )[0] if len(element_components) > 5 else None
 
-        anwendungsreferenz = MSCONSUtils.split_components(
+        anwendungsreferenz = self._syntax_parser.split_components(
             string_content=element_components[7]
         )[0] if len(element_components) > 7 else None
 
-        test_kennzeichen = MSCONSUtils.split_components(
+        test_kennzeichen = self._syntax_parser.split_components(
             string_content=element_components[11]
         )[0] if len(element_components) > 11 else None
 

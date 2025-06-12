@@ -2,20 +2,39 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentSTS, Statusanlass, Status, Statuskategorie
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import (
+    SegmentGroup, SegmentSTS, Statusanlass, Status, Statuskategorie
+)
 
 
 class STSSegmentConverter(SegmentConverter[SegmentSTS]):
+    """
+    Converter for STS (Status) segments.
 
-    def __init__(self):
-        pass
+    This converter transforms STS segment data from EDIFACT format into a structured
+    SegmentSTS object. The STS segment is used to specify status information such as 
+    correction reason, gas quality, replacement value formation procedure, or 
+    plausibility note.
+    """
+
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the STS segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentSTS:
         """
         Converts STS (Status) segment components to a SegmentSTS object.
@@ -27,6 +46,7 @@ class STSSegmentConverter(SegmentConverter[SegmentSTS]):
             element_components: List of segment components
             last_segment_type: The type of the previous segment
             current_segment_group: The current segment group being processed
+            context: The context to use for the converter.
 
         Returns:
             SegmentSTS object with status category, status code, and status reason
@@ -61,6 +81,19 @@ class STSSegmentConverter(SegmentConverter[SegmentSTS]):
             qualifier_code: Optional[str],
             current_segment_group: Optional[SegmentGroup]
     ) -> Optional[str]:
+        """
+        Maps STS status category codes to human-readable identifier names.
+
+        This method provides specific mappings for status category codes to meaningful
+        names that describe the type of status information being provided.
+
+        Args:
+            qualifier_code: The status category code from the STS segment
+            current_segment_group: The current segment group being processed
+
+        Returns:
+            A human-readable identifier name for the status category, or None if no mapping exists
+        """
         if not qualifier_code:
             return None
         if qualifier_code == "10":

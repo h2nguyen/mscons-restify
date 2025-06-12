@@ -1,7 +1,9 @@
 import unittest
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNZ
 from msconsparser.libs.edifactmsconsparser.converters import UNZSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNZ
 
 
 class TestUNZSegmentConverter(unittest.TestCase):
@@ -9,7 +11,9 @@ class TestUNZSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = UNZSegmentConverter()
+        self.context = ParsingContext()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = UNZSegmentConverter(syntax_parser=self.syntax_parser)
 
     def test_convert_internal(self):
         """Test the _convert_internal method."""
@@ -19,7 +23,12 @@ class TestUNZSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNZ)
@@ -36,7 +45,13 @@ class TestUNZSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
     def test_convert_with_invalid_datenaustauschzaehler(self):
         """Test the convert method with an exception due to invalid datenaustauschzaehler."""
@@ -48,7 +63,13 @@ class TestUNZSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
 
 if __name__ == '__main__':

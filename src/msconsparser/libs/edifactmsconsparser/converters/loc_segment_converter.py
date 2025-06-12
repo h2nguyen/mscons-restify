@@ -2,20 +2,38 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentLOC, Ortsangabe, ZugehoerigerOrt1Identifikation
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import (
+    SegmentGroup, SegmentLOC, Ortsangabe, ZugehoerigerOrt1Identifikation
+)
 
 
 class LOCSegmentConverter(SegmentConverter[SegmentLOC]):
+    """
+    Converter for LOC (Location) segments.
 
-    def __init__(self):
-        pass
+    This converter transforms LOC segment data from EDIFACT format into a structured
+    SegmentLOC object. The LOC segment is used to specify the identification to which 
+    the data applies and when EEG transfer time series are transferred.
+    """
+
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the LOC segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentLOC:
         """
         Converts LOC (Identification information / balancing group) segment components to a SegmentLOC object.
@@ -27,6 +45,7 @@ class LOCSegmentConverter(SegmentConverter[SegmentLOC]):
             element_components: List of segment components
             last_segment_type: The type of the previous segment
             current_segment_group: The current segment group being processed
+            context: The context to use for the converter.
 
         Returns:
             SegmentLOC object with location information

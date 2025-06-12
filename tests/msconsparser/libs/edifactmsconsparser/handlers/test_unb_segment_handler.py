@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import MagicMock
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import ParsingContext, EdifactInterchange, SegmentUNB
 from msconsparser.libs.edifactmsconsparser.converters import UNBSegmentConverter
 from msconsparser.libs.edifactmsconsparser.handlers import UNBSegmentHandler
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import EdifactInterchange, SegmentUNB
 
 
 class TestUNBSegmentHandler(unittest.TestCase):
@@ -11,7 +13,8 @@ class TestUNBSegmentHandler(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.handler = UNBSegmentHandler()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.handler = UNBSegmentHandler(syntax_parser=self.syntax_parser)
         self.context = ParsingContext()
         self.context.interchange = EdifactInterchange()
         self.segment = SegmentUNB()
@@ -57,10 +60,10 @@ class TestUNBSegmentHandler(unittest.TestCase):
         element_components = ["UNB", "UNOC", "3", "SENDER", "ZZ", "RECIPIENT", "ZZ", "230101", "1200", "12345"]
         last_segment_type = None
         current_segment_group = None
-        
+
         # Mock the converter's convert method to return a known segment
         self.handler.converter.convert = MagicMock(return_value=self.segment)
-        
+
         # Mock the _update_context method to verify it's called
         self.handler._update_context = MagicMock()
 
@@ -72,7 +75,8 @@ class TestUNBSegmentHandler(unittest.TestCase):
             line_number=line_number,
             element_components=element_components,
             last_segment_type=last_segment_type,
-            current_segment_group=current_segment_group
+            current_segment_group=current_segment_group,
+            context=self.context
         )
         self.handler._update_context.assert_called_once_with(self.segment, current_segment_group, self.context)
 
@@ -84,10 +88,10 @@ class TestUNBSegmentHandler(unittest.TestCase):
         last_segment_type = None
         current_segment_group = None
         self.context.interchange = None  # This will make _can_handle return False
-        
+
         # Mock the converter's convert method to verify it's not called
         self.handler.converter.convert = MagicMock()
-        
+
         # Mock the _update_context method to verify it's not called
         self.handler._update_context = MagicMock()
 

@@ -27,8 +27,9 @@ class SegmentDTM(BaseModel):
     - '163': Processing period, start date/time (Verarbeitung, Beginndatum/-zeit)
     - '164': Processing period, end date/time (Verarbeitung, Endedatum/-zeit)
     """
-    bezeichner: Optional[str] = None  # technical field
-    datums_oder_uhrzeits_oder_zeitspannen_funktion_qualifier: Optional[str] = None  # e.g., '137' Dokumenten-/Nachrichtendatum/-zeit
+    bezeichner: Optional[str] = None  # NON-EDIFACT custom technical field
+    datums_oder_uhrzeits_oder_zeitspannen_funktion_qualifier: Optional[
+        str] = None  # e.g., '137' Dokumenten-/Nachrichtendatum/-zeit
     datum_oder_uhrzeit_oder_zeitspanne_wert: Optional[str] = None  # e.g., '202308150730000'
     datums_oder_uhrzeit_oder_zeitspannen_format_code: Optional[str] = None  # e.g., '303' (Format CCYYMMDDHHMMZZZ)
 
@@ -51,8 +52,6 @@ class SegmentRFF(BaseModel):
     - '23': Device number (Gerätenummer)
     - '24': Configuration ID (Konfigurations-ID)
     """
-    bezeichner: Optional[str] = None  # technical field
+    bezeichner: Optional[str] = None  # NON-EDIFACT custom technical field
     referenz_qualifier: Optional[str] = None  # e.g., 'Z13' Prüfidentifikator
     referenz_identifikation: Optional[str] = None  # e.g., '13025'
-
-

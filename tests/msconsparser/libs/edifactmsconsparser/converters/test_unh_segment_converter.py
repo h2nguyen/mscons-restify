@@ -1,7 +1,9 @@
 import unittest
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNH
 from msconsparser.libs.edifactmsconsparser.converters import UNHSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNH
 
 
 class TestUNHSegmentConverter(unittest.TestCase):
@@ -9,7 +11,9 @@ class TestUNHSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = UNHSegmentConverter()
+        self.context = ParsingContext()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = UNHSegmentConverter(syntax_parser=self.syntax_parser)
 
     def test_convert_internal_with_basic_components(self):
         """Test the _convert_internal method with basic components."""
@@ -19,7 +23,12 @@ class TestUNHSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNH)
@@ -40,7 +49,12 @@ class TestUNHSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNH)
@@ -62,7 +76,12 @@ class TestUNHSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNH)
@@ -81,7 +100,13 @@ class TestUNHSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
 
 if __name__ == '__main__':

@@ -51,7 +51,8 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_input, max_lines_to_parse=-1)
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_input,
+                                                                       max_lines_to_parse=-1)
         mock_parsed_obj.model_dump.assert_called_once()
 
     @pytest.mark.asyncio
@@ -123,7 +124,8 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_file, max_lines_to_parse=-1)
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_file,
+                                                                       max_lines_to_parse=-1)
         mock_parsed_obj.model_dump.assert_called_once()
 
     @pytest.mark.asyncio
@@ -192,7 +194,8 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data", max_lines_to_parse=-1)
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data",
+                                                                       max_lines_to_parse=-1)
 
     @pytest.mark.asyncio
     async def test_parse_mscons_file_tuple(self):
@@ -211,7 +214,8 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data", max_lines_to_parse=-1)
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data",
+                                                                       max_lines_to_parse=-1)
 
     @pytest.mark.asyncio
     @patch('time.strftime')
@@ -233,8 +237,10 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.assertEqual(response.headers["Content-Disposition"], "attachment; filename=mscons_parsed_20230101_120000.json")
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_input, max_lines_to_parse=-1)
+        self.assertEqual(response.headers["Content-Disposition"],
+                         "attachment; filename=mscons_parsed_20230101_120000.json")
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_input,
+                                                                       max_lines_to_parse=-1)
         mock_parsed_obj.model_dump.assert_called_once()
 
     @pytest.mark.asyncio
@@ -287,8 +293,10 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.assertEqual(response.headers["Content-Disposition"], "attachment; filename=mscons_parsed_20230101_120000.json")
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_file, max_lines_to_parse=-1)
+        self.assertEqual(response.headers["Content-Disposition"],
+                         "attachment; filename=mscons_parsed_20230101_120000.json")
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content=mscons_file,
+                                                                       max_lines_to_parse=-1)
         mock_parsed_obj.model_dump.assert_called_once()
 
     @pytest.mark.asyncio
@@ -353,7 +361,8 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data", max_lines_to_parse=-1)
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data",
+                                                                       max_lines_to_parse=-1)
 
     @pytest.mark.asyncio
     async def test_download_parsed_file_result_tuple(self):
@@ -371,7 +380,8 @@ class TestParseMSCONSRouter(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data", max_lines_to_parse=-1)
+        self.mock_parser_service.parse_message.assert_called_once_with(message_content="test_mscons_data",
+                                                                       max_lines_to_parse=-1)
 
 
 if __name__ == "__main__":

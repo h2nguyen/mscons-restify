@@ -214,7 +214,7 @@ To run the server on a Docker container, please execute the following from the r
          │               ├── converters       # Contains segment converters
          │               ├── exceptions       # Contains parser-specific exceptions
          │               ├── handlers         # Contains segment handlers
-         │               ├── utils            # Contains utility functions
+         │               ├── utils            # Contains utility and helper functions
          │               └── wrappers         # Contains library model wrappers
          │                   └── segments     # Contains segment model definitions
          └── tests                            # Contain all tests of the project
@@ -229,9 +229,9 @@ To run the server on a Docker container, please execute the following from the r
    - The parser uses a dispatcher pattern to handle different segment types
    - Each segment type has its own converter in `libs/edifactmsconsparser/converters` and handlers in `libs/edifactmsconsparser/handlers`
    - The main parser class is `EdifactMSCONSParser` in `libs/edifactmsconsparser/edifact_mscons_parser.py`
-   - Domain models are located in `libs/edifactmsconsparser/wrappers/segments`
-   - For a detailed explanation of the parsing process, see [mscons-parsing-process.md](docs/mscons-parsing-process.md)
+   - Domain models are located in `libs/edifactmsconsparser/wrappers/segments` 
    - Library related exceptions are defined in `libs/edifactmsconsparser/exceptions` and use these exceptions for library-specific error handling
+   - For a detailed explanation of the parsing process, see [mscons-parsing-process.md](docs/mscons-parsing-process.md)
 
 4. **API Implementation**:
    - The API is implemented using FastAPI

@@ -1,5 +1,5 @@
 """
-Models related to locations in the MSCONS message (NAD, LOC in SG5 and SG6).
+Models related to locations in the MSCONS message (NAD, LOC in SG5, and SG6).
 
 These models represent location information and related data in the MSCONS message.
 According to the MSCONS D.04B 2.4c standard, these segments are used to identify

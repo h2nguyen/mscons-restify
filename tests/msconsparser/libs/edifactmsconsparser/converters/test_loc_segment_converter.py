@@ -1,7 +1,9 @@
 import unittest
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.location import SegmentLOC
 from msconsparser.libs.edifactmsconsparser.converters import LOCSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.location import SegmentLOC
 
 
 class TestLOCSegmentConverter(unittest.TestCase):
@@ -9,7 +11,9 @@ class TestLOCSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = LOCSegmentConverter()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = LOCSegmentConverter(syntax_parser=self.syntax_parser)
+        self.context = ParsingContext()
 
     def test_convert_internal_with_all_components(self):
         """Test the _convert_internal method with all components."""
@@ -19,7 +23,12 @@ class TestLOCSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentLOC)
@@ -27,7 +36,8 @@ class TestLOCSegmentConverter(unittest.TestCase):
         self.assertIsNotNone(result.ortsangabe)
         self.assertEqual(result.ortsangabe.ortsangabe_code, "11XUENBSOLS----X")
         self.assertIsNotNone(result.zugehoeriger_ort_1_identifikation)
-        self.assertEqual(result.zugehoeriger_ort_1_identifikation.erster_zugehoeriger_platz_ort_code, "11XVNBSOLS-----X")
+        self.assertEqual(result.zugehoeriger_ort_1_identifikation.erster_zugehoeriger_platz_ort_code,
+                         "11XVNBSOLS-----X")
 
     def test_convert_internal_with_only_ortsangabe(self):
         """Test the _convert_internal method with only ortsangabe."""
@@ -37,7 +47,12 @@ class TestLOCSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentLOC)
@@ -54,7 +69,12 @@ class TestLOCSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentLOC)
@@ -72,7 +92,13 @@ class TestLOCSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
 
 if __name__ == '__main__':

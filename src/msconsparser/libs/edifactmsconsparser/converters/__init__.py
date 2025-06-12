@@ -2,6 +2,7 @@
 """
 Package for segment converters.
 """
+
 from msconsparser.libs.edifactmsconsparser.converters.segment_converter import SegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.bgm_segment_converter import BGMSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.cci_segment_converter import CCISegmentConverter
@@ -15,9 +16,9 @@ from msconsparser.libs.edifactmsconsparser.converters.pia_segment_converter impo
 from msconsparser.libs.edifactmsconsparser.converters.qty_segment_converter import QTYSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.rff_segment_converter import RFFSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.sts_segment_converter import STSSegmentConverter
+from msconsparser.libs.edifactmsconsparser.converters.una_segment_converter import UNASegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.unb_segment_converter import UNBSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.unh_segment_converter import UNHSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.uns_segment_converter import UNSSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.unt_segment_converter import UNTSegmentConverter
 from msconsparser.libs.edifactmsconsparser.converters.unz_segment_converter import UNZSegmentConverter
-from msconsparser.libs.edifactmsconsparser.converters.una_segment_converter import UNASegmentConverter

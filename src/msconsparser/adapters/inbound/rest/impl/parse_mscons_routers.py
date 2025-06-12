@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 MAX_LINES_TO_PARSE = 2442
 UNLIMITED_LINES_TO_PARSE_INDICATOR = -1
 
+
 class ParseMSCONSRouter(BaseMSCONSParserApi):
     """
     Router class for handling MSCONS message parsing requests.
@@ -29,8 +30,8 @@ class ParseMSCONSRouter(BaseMSCONSParserApi):
     """
 
     def __init__(
-        self,
-        parser_service: ParserService = None,
+            self,
+            parser_service: ParserService = None,
     ):
         """
         Initialize the ParseMSCONSRouter with a parser service.
@@ -42,9 +43,10 @@ class ParseMSCONSRouter(BaseMSCONSParserApi):
         self.__parser_service = parser_service or ParserService()
 
     async def parse_mscons_raw_format(
-        self,
-        limit_mode: Annotated[StrictBool, Field(description="If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.")],
-        body: Annotated[StrictStr, Field(description="The raw MSCONS message as plain text.")],
+            self,
+            limit_mode: Annotated[StrictBool, Field(
+                description="If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.")],
+            body: Annotated[StrictStr, Field(description="The raw MSCONS message as plain text.")],
     ) -> JSONResponse:
         """
         Parse a raw MSCONS message and return the result as JSON.
@@ -73,9 +75,11 @@ class ParseMSCONSRouter(BaseMSCONSParserApi):
         return JSONResponse(status_code=status.HTTP_200_OK, content=parsed_mscons_obj.model_dump())
 
     async def parse_mscons_file(
-        self,
-        limit_mode: Annotated[StrictBool, Field(description="If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.")],
-        body: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="The raw MSCONS message as a file.")],
+            self,
+            limit_mode: Annotated[StrictBool, Field(
+                description="If true, enables the parsing limit for max number of lines, as per default it is maximum 2442 lines.")],
+            body: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(
+                description="The raw MSCONS message as a file.")],
     ) -> JSONResponse:
         """
         Parse a raw MSCONS message from a file and return the result as JSON.
@@ -112,8 +116,8 @@ class ParseMSCONSRouter(BaseMSCONSParserApi):
         return JSONResponse(status_code=status.HTTP_200_OK, content=parsed_mscons_obj.model_dump())
 
     async def download_parsed_result(
-        self,
-        body: Annotated[StrictStr, Field(description="The raw MSCONS message as plain text.")],
+            self,
+            body: Annotated[StrictStr, Field(description="The raw MSCONS message as plain text.")],
     ) -> JSONResponse:
         """
         Parse a raw MSCONS message and return the result as a downloadable JSON file.
@@ -148,8 +152,9 @@ class ParseMSCONSRouter(BaseMSCONSParserApi):
         )
 
     async def download_parsed_file_result(
-        self,
-        body: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="The raw MSCONS message as a file.")],
+            self,
+            body: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(
+                description="The raw MSCONS message as a file.")],
     ) -> JSONResponse:
         """
         Parse a raw MSCONS message from a file and return the result as a downloadable JSON file.

@@ -2,20 +2,36 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentUNZ
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentUNZ
 
 
 class UNZSegmentConverter(SegmentConverter[SegmentUNZ]):
+    """
+    Converter for UNZ (Interchange Trailer) segments.
 
-    def __init__(self):
-        pass
+    This converter transforms UNZ segment data from EDIFACT format into a structured
+    SegmentUNZ object. The UNZ segment is used to end and check the completeness of an 
+    interchange, containing the count of messages in the interchange and the interchange reference.
+    """
+
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the UNZ segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentUNZ:
         """
         Converts UNZ (Interchange Trailer) segment components to a SegmentUNZ object.
@@ -27,6 +43,7 @@ class UNZSegmentConverter(SegmentConverter[SegmentUNZ]):
             element_components: List of segment components
             last_segment_type: The type of the previous segment
             current_segment_group: The current segment group being processed
+            context: The context to use for the converter.
 
         Returns:
             SegmentUNZ object with message count and interchange reference

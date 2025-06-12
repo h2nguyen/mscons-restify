@@ -2,24 +2,39 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentLIN, SegmentGroup9, ParsingContext
 from msconsparser.libs.edifactmsconsparser.converters import LINSegmentConverter
 from msconsparser.libs.edifactmsconsparser.handlers import SegmentHandler
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import (
+    SegmentGroup, SegmentLIN, SegmentGroup9
+)
 
 
 class LINSegmentHandler(SegmentHandler[SegmentLIN]):
     """
-    Handler for LIN segments.
+    Handler for LIN (Line Item) segments.
+
+    This handler processes LIN segments, which identify a line item and its configuration 
+    in a message. It updates the parsing context with the converted LIN segment information, 
+    creating a new segment group 9 when needed.
     """
 
-    def __init__(self):
-        super().__init__(LINSegmentConverter())
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the LIN segment handler with the appropriate converter.
 
-    def _update_context(self, segment: SegmentLIN, current_segment_group: Optional[SegmentGroup], context: ParsingContext) -> None:
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(LINSegmentConverter(syntax_parser=syntax_parser))
+
+    def _update_context(self, segment: SegmentLIN, current_segment_group: Optional[SegmentGroup],
+                        context: ParsingContext) -> None:
         """
         Update the context with the converted LIN segment.
         The update depends on the current segment group.
-        
+
         Args:
             segment: The converted LIN segment.
             current_segment_group: The current segment group.

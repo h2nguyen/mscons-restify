@@ -2,20 +2,38 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentCCI, Merkmalsbeschreibung
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import (
+    SegmentGroup, SegmentCCI, Merkmalsbeschreibung
+)
 
 
 class CCISegmentConverter(SegmentConverter[SegmentCCI]):
+    """
+    Converter for CCI (Characteristic/Class ID) segments.
 
-    def __init__(self):
-        pass
+    This converter transforms CCI segment data from EDIFACT format into a structured
+    SegmentCCI object. The CCI segment is used to specify product characteristics 
+    and the data that defines those characteristics.
+    """
+
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the CCI segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentCCI:
         """
         Converts CCI (Characteristic/Class ID) segment components to a SegmentCCI object.
@@ -26,6 +44,7 @@ class CCISegmentConverter(SegmentConverter[SegmentCCI]):
             element_components: List of segment components
             last_segment_type: The type of the previous segment
             current_segment_group: The current segment group being processed
+            context: The context to use for the converter.
 
         Returns:
             SegmentCCI object with class type code and characteristic description
@@ -34,7 +53,8 @@ class CCISegmentConverter(SegmentConverter[SegmentCCI]):
         CCI+15++BI1'
         """
         klassentyp_code = element_components[1]
-        gemessene_dimension_code = element_components[2] if len(element_components) > 2 and element_components[2] != "" else None
+        gemessene_dimension_code = element_components[2] if len(element_components) > 2 and element_components[
+            2] != "" else None
         merkmal_code = element_components[3] if len(element_components) > 3 else None
 
         return SegmentCCI(

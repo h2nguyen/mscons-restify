@@ -11,6 +11,7 @@ class HealthEndpointsFilter(logging.Filter):
     This filter prevents logging of 200 status responses from readiness, liveness, 
     and metrics endpoints to reduce noise in the logs.
     """
+
     def filter(self, record: logging.LogRecord):
         """
         Filter log records based on their content.

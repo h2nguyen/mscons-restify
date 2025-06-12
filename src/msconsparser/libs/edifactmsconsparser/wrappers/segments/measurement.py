@@ -1,5 +1,5 @@
 """
-Models related to measurements in the MSCONS message (LIN, PIA, QTY, STS in SG9 and SG10).
+Models related to measurements in the MSCONS message (LIN, PIA, QTY, STS in SG9, and SG10).
 
 These models represent measurement data and related information in the MSCONS message.
 According to the MSCONS D.04B 2.4c standard, these segments are used to provide
@@ -142,9 +142,7 @@ class SegmentSTS(BaseModel):
     This segment is used to provide information about plausibility, substitute value methods,
     correction reasons, gas quality, etc.
     """
-    bezeichner: Optional[str] = None  # technical field
+    bezeichner: Optional[str] = None  # NON-EDIFACT custom technical field
     statuskategorie: Optional[Statuskategorie] = None  # Type of status
     status: Optional[Status] = None  # Actual status
     statusanlass: Optional[Statusanlass] = None  # Reason for status
-
-

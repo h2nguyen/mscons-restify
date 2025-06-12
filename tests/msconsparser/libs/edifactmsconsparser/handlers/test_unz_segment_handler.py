@@ -1,11 +1,12 @@
 import unittest
 from unittest.mock import MagicMock
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import ParsingContext
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNZ
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import EdifactMSconsMessage
 from msconsparser.libs.edifactmsconsparser.converters import UNZSegmentConverter
 from msconsparser.libs.edifactmsconsparser.handlers.unz_segment_handler import UNZSegmentHandler
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import EdifactMSconsMessage
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNZ
 
 
 class TestUNZSegmentHandler(unittest.TestCase):
@@ -13,7 +14,8 @@ class TestUNZSegmentHandler(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.handler = UNZSegmentHandler()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.handler = UNZSegmentHandler(syntax_parser=self.syntax_parser)
         self.context = ParsingContext()
         self.context.current_message = EdifactMSconsMessage()
         self.segment = SegmentUNZ()
@@ -76,7 +78,8 @@ class TestUNZSegmentHandler(unittest.TestCase):
             line_number=line_number,
             element_components=element_components,
             last_segment_type=last_segment_type,
-            current_segment_group=current_segment_group
+            current_segment_group=current_segment_group,
+            context=self.context
         )
         self.handler._update_context.assert_called_once_with(self.segment, current_segment_group, self.context)
 

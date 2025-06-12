@@ -11,9 +11,14 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.interchange import SegmentUNB, SegmentUNZ
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.message import SegmentUNH, SegmentBGM, SegmentUNT, SegmentUNS
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.message import (
+    SegmentUNH, SegmentBGM, SegmentUNT, SegmentUNS
+)
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.reference import SegmentDTM
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.segment_group import SegmentGroup1, SegmentGroup2, SegmentGroup5
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.segment_group import (
+    SegmentGroup1, SegmentGroup2, SegmentGroup5
+)
+
 
 class SegmentUNA(BaseModel):
     """
@@ -34,14 +39,22 @@ class SegmentUNA(BaseModel):
     6. Position 8: Reserved (usually space)
     7. Position 9: Segment terminator
 
+    Attributes:
+        component_separator: Character that separates components within an element.
+        element_separator: Character that separates elements within a segment.
+        decimal_mark: Character that specifies a decimal point in a numeric value
+        release_character: Escape character used to include special characters in data
+        reserved: Character that marks reserved use of a component
+        segment_terminator: Character that marks the end of a segment.
+
     Example: UNA:+.? '
     """
-    component_separator: str  # Position 4: Component separator (:)
-    element_separator: str    # Position 5: Data element separator (+)
-    decimal_mark: str         # Position 6: Decimal notation mark (.)
-    release_character: str    # Position 7: Release character (?)
-    reserved: str             # Position 8: Reserved (usually space)
-    segment_terminator: str   # Position 9: Segment terminator (')
+    component_separator: str  # Position 4: Component separator, e.g. (:)
+    element_separator: str    # Position 5: Data element separator, e.g. (+)
+    decimal_mark: str         # Position 6: Decimal notation mark, e.g. (.)
+    release_character: str    # Position 7: Release character, e.g. (?)
+    reserved: str             # Position 8: Reserved, usually space, e.g. ( )
+    segment_terminator: str   # Position 9: Segment terminator, e.g. (')
 
 
 class EdifactMSconsMessage(BaseModel):
@@ -88,9 +101,9 @@ class EdifactInterchange(BaseModel):
     The UNA segment, when present, defines the special characters used as delimiters.
     """
     una_service_string_advice: Optional[SegmentUNA] = None  # Service string advice
-    unb_nutzdaten_kopfsegment: SegmentUNB = None # Interchange header
+    unb_nutzdaten_kopfsegment: SegmentUNB = None  # Interchange header
     unh_unt_nachrichten: list[EdifactMSconsMessage] = Field(default_factory=list)  # Messages
-    unz_nutzdaten_endsegment: SegmentUNZ = None # Interchange trailer
+    unz_nutzdaten_endsegment: SegmentUNZ = None  # Interchange trailer
 
     def to_json(self) -> str:
         """

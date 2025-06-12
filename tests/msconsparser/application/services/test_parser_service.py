@@ -19,7 +19,8 @@ class TestParserService(unittest.TestCase):
 
     def test_init_without_parse_message_usecase(self):
         """Test that the service creates a new parse message usecase if none is provided."""
-        with unittest.mock.patch('msconsparser.application.services.parser_service.ParseMessageUseCase') as mock_parse_message_usecase_class:
+        with unittest.mock.patch(
+                'msconsparser.application.services.parser_service.ParseMessageUseCase') as mock_parse_message_usecase_class:
             mock_parse_message_usecase_instance = MagicMock(spec=ParseMessageUseCase)
             mock_parse_message_usecase_class.return_value = mock_parse_message_usecase_instance
 
@@ -37,7 +38,8 @@ class TestParserService(unittest.TestCase):
         self.mock_parse_message_usecase.execute.return_value = expected_result
 
         # Execute
-        result = self.parser_service.parse_message(message_content=message_content, max_lines_to_parse=max_lines_to_parse)
+        result = self.parser_service.parse_message(message_content=message_content,
+                                                   max_lines_to_parse=max_lines_to_parse)
 
         # Verify
         self.assertEqual(result, expected_result)

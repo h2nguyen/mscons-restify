@@ -2,24 +2,39 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentNAD, SegmentGroup2, SegmentGroup5, ParsingContext
 from msconsparser.libs.edifactmsconsparser.converters import NADSegmentConverter
 from msconsparser.libs.edifactmsconsparser.handlers import SegmentHandler
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import (
+    SegmentGroup, SegmentNAD, SegmentGroup2, SegmentGroup5
+)
 
 
 class NADSegmentHandler(SegmentHandler[SegmentNAD]):
     """
-    Handler for NAD segments.
+    Handler for NAD (Name and Address) segments.
+
+    This handler processes NAD segments, which identify the market partners and 
+    the delivery location. It updates the parsing context with the converted NAD 
+    segment information, creating new segment groups (SG2 or SG5) as needed.
     """
 
-    def __init__(self):
-        super().__init__(NADSegmentConverter())
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the NAD segment handler with the appropriate converter.
 
-    def _update_context(self, segment: SegmentNAD, current_segment_group: Optional[SegmentGroup], context: ParsingContext) -> None:
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(NADSegmentConverter(syntax_parser=syntax_parser))
+
+    def _update_context(self, segment: SegmentNAD, current_segment_group: Optional[SegmentGroup],
+                        context: ParsingContext) -> None:
         """
         Update the context with the converted NAD segment.
         The update depends on the current segment group.
-        
+
         Args:
             segment: The converted NAD segment.
             current_segment_group: The current segment group.
