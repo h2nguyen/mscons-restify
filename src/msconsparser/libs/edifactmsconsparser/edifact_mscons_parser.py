@@ -3,10 +3,12 @@
 import logging
 from typing import Optional
 
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
 from msconsparser.libs.edifactmsconsparser.exceptions import MSCONSParserException
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType, SegmentGroup, ParsingContext, EdifactInterchange
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType, SegmentGroup, EdifactInterchange
 from msconsparser.libs.edifactmsconsparser.handlers import SegmentHandlerFactory
-from msconsparser.libs.edifactmsconsparser.utils.mscons_utils import MSCONSUtils
+from msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.constants import EdifactConstants
 
 logger = logging.getLogger(__name__)
 
@@ -19,16 +21,17 @@ class EdifactMSCONSParser:
 
     def __init__(self, handler_factory: Optional[SegmentHandlerFactory] = None) -> None:
         self.__context = ParsingContext()
-        self.__handler_factory = handler_factory or SegmentHandlerFactory()
+        self.__syntax_parser = EdifactSyntaxHelper()
+        self.__handler_factory = handler_factory or SegmentHandlerFactory(self.__syntax_parser)
 
-    def parse(self, edifact_text: str, max_line_to_parse: int = -1) -> EdifactInterchange:
+    def parse(self, edifact_text: str, max_lines_to_parse: int = -1) -> EdifactInterchange:
         """
         Main method: Reads the EDIFACT string, splits it at the segment separators,
         and calls the appropriate handler for each segment.
 
         Args:
             edifact_text (str): The EDIFACT text to parse
-            max_line_to_parse (int): The maximum number of lines to parse, defaults to -1 has not parsing limit
+            max_lines_to_parse (int): The maximum number of lines to parse, defaults to -1 has not parsing limit
 
         Returns:
             EdifactInterchange: The parsed interchange object
@@ -36,11 +39,13 @@ class EdifactMSCONSParser:
         if edifact_text is None:
             raise MSCONSParserException("No valid parsing input. Input was", str(edifact_text))
 
-        segments = MSCONSUtils.split_segments(edifact_text)
+        edifact_text = self.__extract_and_process_una_segment(edifact_text)
+
+        segments = self.__syntax_parser.split_segments(edifact_text, self.__context)
         amount_of_segments = len(segments)
 
-        if (0 < max_line_to_parse) and (max_line_to_parse < amount_of_segments):
-            raise MSCONSParserException(f"Maximum number of segments reached (max: {max_line_to_parse} less than number of segments: {amount_of_segments})")
+        if (0 < max_lines_to_parse) and (max_lines_to_parse < amount_of_segments):
+            raise MSCONSParserException(f"Maximum number of segments reached (max: {max_lines_to_parse} less than number of segments: {amount_of_segments})")
 
         last_segment_type: Optional[str] = None
         current_segment_group: Optional[str] = None
@@ -50,13 +55,15 @@ class EdifactMSCONSParser:
             segment_line = segment.strip()
             if not segment_line:
                 continue
-            element_components = MSCONSUtils.split_elements(
-                string_content=segment_line
+            element_components = self.__syntax_parser.split_elements(
+                string_content=segment_line,
+                context=self.__context
             )
             if not element_components:
                 continue
-            segment_type_components = MSCONSUtils.split_components(
-                string_content=element_components[0]
+            segment_type_components = self.__syntax_parser.split_components(
+                string_content=element_components[0],
+                context=self.__context
             )
             if not segment_type_components:
                 continue
@@ -80,6 +87,30 @@ class EdifactMSCONSParser:
             last_segment_type = segment_type
 
         return self.__context.interchange
+
+    def __extract_and_process_una_segment(self, edifact_text):
+        # Check for UNA segment at the beginning of the file
+        if edifact_text.startswith(SegmentType.UNA):
+            # Extract the UNA segment (always 9 characters long)
+            una_segment = edifact_text[:EdifactConstants.UNA_SEGMENT_MAX_LENGTH]
+
+            # Process the UNA segment to set the delimiters
+            una_handler = self.__handler_factory.get_handler(SegmentType.UNA)
+            if una_handler:
+                una_handler.handle(
+                    line_number=1,
+                    element_components=[una_segment],
+                    last_segment_type=None,
+                    current_segment_group=None,
+                    context=self.__context
+                )
+
+            # Remove the UNA segment from the text to avoid processing it again
+            # IMPROVEMENT note:
+            # Should we do this or just leave the UNA segment in the text to save processing time?
+            # Since the text can be very long, it might be better to leave it in the text to save processing time.
+            edifact_text = edifact_text[EdifactConstants.UNA_SEGMENT_MAX_LENGTH:]
+        return edifact_text
 
     @staticmethod
     def get_segment_group(

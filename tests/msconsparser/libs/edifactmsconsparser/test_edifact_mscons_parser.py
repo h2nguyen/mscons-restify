@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType, SegmentGroup, EdifactInterchange
 from msconsparser.libs.edifactmsconsparser.edifact_mscons_parser import EdifactMSCONSParser
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType, SegmentGroup, EdifactInterchange
 
 
 class TestEdifactMSCONSParser(unittest.TestCase):
@@ -26,9 +27,9 @@ class TestEdifactMSCONSParser(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertEqual(0, self.parser._EdifactMSCONSParser__context.segment_count)
 
-    @patch('msconsparser.libs.edifactmsconsparser.utils.mscons_utils.MSCONSUtils.split_segments')
-    @patch('msconsparser.libs.edifactmsconsparser.utils.mscons_utils.MSCONSUtils.split_elements')
-    @patch('msconsparser.libs.edifactmsconsparser.utils.mscons_utils.MSCONSUtils.split_components')
+    @patch('msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper.EdifactSyntaxHelper.split_segments')
+    @patch('msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper.EdifactSyntaxHelper.split_elements')
+    @patch('msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper.EdifactSyntaxHelper.split_components')
     def test_parse_with_mocked_utils(self, mock_split_components, mock_split_elements, mock_split_segments):
         """Test parsing with mocked utility methods."""
         # Arrange
@@ -46,7 +47,7 @@ class TestEdifactMSCONSParser(unittest.TestCase):
 
         # Assert
         self.assertIsNotNone(result)
-        mock_split_segments.assert_called_once_with("test_data")
+        mock_split_segments.assert_called_once()
         mock_split_elements.assert_called_once()
         mock_split_components.assert_called_once()
         mock_handler.handle.assert_called_once()
@@ -157,6 +158,45 @@ class TestEdifactMSCONSParser(unittest.TestCase):
 
         # Assert
         self.assertEqual(None, result)
+
+    @patch(
+        'msconsparser.libs.edifactmsconsparser.converters.unb_segment_converter.EdifactSyntaxHelper.split_components')
+    def test_parse_with_una_segment(self, mock_split_components):
+        """Test parsing with a UNA segment at the beginning of the file."""
+        # Arrange
+        sample_data = "UNA;*%? 'UNB*UNOC;3*SENDER;ZZ*RECIPIENT;ZZ*230101;1200*12345'"
+
+        # Mock the split_components method to return the expected values
+        mock_split_components.side_effect = [
+            ["UNOC", "3"],  # syntax_info
+            ["SENDER", "ZZ"],  # absender_info
+            ["RECIPIENT", "ZZ"],  # empfaenger_info
+            ["230101", "1200"],  # erstellung_info
+            ["12345"]  # datenaustauschreferenz
+        ]
+
+        # Act
+        result = self.parser.parse(sample_data)
+
+        # Assert
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, EdifactInterchange)
+        self.assertIsNotNone(result.una_service_string_advice)
+        self.assertEqual(";", result.una_service_string_advice.component_separator)
+        self.assertEqual("*", result.una_service_string_advice.element_separator)
+        self.assertEqual("%", result.una_service_string_advice.decimal_mark)
+        self.assertEqual("?", result.una_service_string_advice.release_character)
+        self.assertEqual(" ", result.una_service_string_advice.reserved)
+        self.assertEqual("'", result.una_service_string_advice.segment_terminator)
+
+        # Verify that EdifactSyntaxHelper methods return the correct values from the context
+        context = self.parser._EdifactMSCONSParser__context
+        self.assertEqual(";", EdifactSyntaxHelper.get_component_separator(context))
+        self.assertEqual("*", EdifactSyntaxHelper.get_element_separator(context))
+        self.assertEqual("%", EdifactSyntaxHelper.get_decimal_mark(context))
+        self.assertEqual("?", EdifactSyntaxHelper.get_release_indicator(context))
+        self.assertEqual(" ", EdifactSyntaxHelper.get_reserved_indicator(context))
+        self.assertEqual("'", EdifactSyntaxHelper.get_segment_terminator(context))
 
 
 if __name__ == '__main__':

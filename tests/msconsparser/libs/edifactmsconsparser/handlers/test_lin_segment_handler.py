@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import MagicMock
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import ParsingContext, EdifactMSconsMessage, SegmentLIN
 from msconsparser.libs.edifactmsconsparser.converters import LINSegmentConverter
 from msconsparser.libs.edifactmsconsparser.handlers.lin_segment_handler import LINSegmentHandler
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import EdifactMSconsMessage, SegmentLIN
 
 
 class TestLINSegmentHandler(unittest.TestCase):
@@ -11,7 +13,8 @@ class TestLINSegmentHandler(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.handler = LINSegmentHandler()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.handler = LINSegmentHandler(syntax_parser=self.syntax_parser)
         self.context = ParsingContext()
         self.context.current_message = EdifactMSconsMessage()
         self.segment = SegmentLIN()
@@ -59,10 +62,10 @@ class TestLINSegmentHandler(unittest.TestCase):
         element_components = ["LIN", "example", "data"]
         last_segment_type = None
         current_segment_group = None
-        
+
         # Mock the converter's convert method to return a known segment
         self.handler.converter.convert = MagicMock(return_value=self.segment)
-        
+
         # Mock the _update_context method to verify it's called
         self.handler._update_context = MagicMock()
 
@@ -74,7 +77,8 @@ class TestLINSegmentHandler(unittest.TestCase):
             line_number=line_number,
             element_components=element_components,
             last_segment_type=last_segment_type,
-            current_segment_group=current_segment_group
+            current_segment_group=current_segment_group,
+            context=self.context
         )
         self.handler._update_context.assert_called_once_with(self.segment, current_segment_group, self.context)
 
@@ -86,10 +90,10 @@ class TestLINSegmentHandler(unittest.TestCase):
         last_segment_type = None
         current_segment_group = None
         self.context.current_message = None  # This will make _can_handle return False
-        
+
         # Mock the converter's convert method to verify it's not called
         self.handler.converter.convert = MagicMock()
-        
+
         # Mock the _update_context method to verify it's not called
         self.handler._update_context = MagicMock()
 

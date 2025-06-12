@@ -16,6 +16,23 @@ else:
         pass
 
 
+class EdifactConstants:
+    """
+    Constants for EDIFACT message processing.
+    """
+    DOT_DECIMAL = "."
+
+    UNA_SEGMENT_MAX_LENGTH: int = 9
+
+    # Default delimiters and specifiers according to the EDIFACT standard using in the UNA Segment
+    DEFAULT_COMPONENT_SEPARATOR: str = ":"  # Default character that separates components within an element.
+    DEFAULT_ELEMENT_SEPARATOR: str = "+"  # Default character that separates elements within a segment.
+    DEFAULT_DECIMAL_MARK: str = "."  # Default character that specifies a decimal point in a numeric value, e.g. "2.1" or "2,1".
+    DEFAULT_RELEASE_INDICATOR: str = "?"  # Default escape character used to include special characters in data, e.g. "+" or ":".
+    DEFAULT_RESERVED_INDICATOR: str = " "  # Default character that marks reserved use of a component, currently it must be a space.
+    DEFAULT_SEGMENT_TERMINATOR: str = "'"  # Default character that marks the end of a segment.
+
+
 class SegmentGroup(StrEnum):
     """
     Segment groups in the MSCONS message structure.
@@ -55,8 +72,6 @@ class SegmentType(StrEnum):
     PIA = "PIA"  # Additional Product ID - Additional product/device ID.
     QTY = "QTY"  # Quantity, e.g., 220 = Measured value of the tariff period.
     CCI = "CCI"  # Marking of the time series type (Composite Code Information).
-    MOA = "MOA"  # Monetary Amount - Monetary values in the header.
-    FTX = "FTX"  # Free Text - Comments, explanatory texts.
     STS = "STS"  # Status - Plausibility, substitute value method, correction reason, gas quality, etc.
 
     # Add more segments according to MSCONS-MIG as needed...

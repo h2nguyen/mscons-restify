@@ -2,40 +2,57 @@
 
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentRFF
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
-from msconsparser.libs.edifactmsconsparser.utils import MSCONSUtils
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentRFF
 
 
 class RFFSegmentConverter(SegmentConverter[SegmentRFF]):
+    """
+    Converter for RFF (Reference) segments.
 
-    def __init__(self):
-        pass
+    This converter transforms RFF segment data from EDIFACT format into a structured
+    SegmentRFF object. The RFF segment is used to specify reference information, such as 
+    verification identifier, configuration ID, device number, or previous master data
+    message of the Metering Point Operator (MSB).
+    """
+
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the RFF segment converter with the syntax parser.
+
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(syntax_parser=syntax_parser)
 
     def _convert_internal(
             self,
             element_components: list[str],
             last_segment_type: Optional[str],
-            current_segment_group: Optional[SegmentGroup]
+            current_segment_group: Optional[SegmentGroup],
+            context: ParsingContext
     ) -> SegmentRFF:
         """
-        Converts RFF (Name and Address) segment components to a SegmentRFF object.
+        Converts RFF (Reference) segment components to a SegmentRFF object.
 
         The RFF segment is used to specify the reference information, e.g.: verification identifier,
-        configuration ID, the device number or previous master data message of the Metering Point Operator (MSB)
+        configuration ID, the device number, or previous master data message of the Metering Point Operator (MSB)
 
         Args:
             element_components: List of segment components
             last_segment_type: The type of the previous segment
             current_segment_group: The current segment group being processed
+            context: The context to use for the converter.
 
         Returns:
-            SegmentRFF object with function qualifier, reference qualifier and identification
+            SegmentRFF object with function qualifier, reference qualifier, and identification
 
         Examples:
         RFF+AGI:AFN9523'
         """
-        details = MSCONSUtils.split_components(element_components[1])
+        details = self._syntax_parser.split_components(element_components[1])
         qualifier = details[0]
         identification = details[1]
 
@@ -53,6 +70,19 @@ class RFFSegmentConverter(SegmentConverter[SegmentRFF]):
             qualifier_code: Optional[str],
             current_segment_group: Optional[SegmentGroup]
     ) -> Optional[str]:
+        """
+        Maps RFF qualifier codes to human-readable identifier names.
+
+        This method provides specific mappings for reference qualifier codes to meaningful
+        names that describe the purpose of the reference in the message.
+
+        Args:
+            qualifier_code: The reference qualifier code from the RFF segment
+            current_segment_group: The current segment group being processed
+
+        Returns:
+            A human-readable identifier name for the reference, or None if no mapping exists
+        """
         if not qualifier_code:
             return None
         if qualifier_code in ["ACW", "AGI"]:

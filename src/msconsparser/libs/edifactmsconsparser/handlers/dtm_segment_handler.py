@@ -3,26 +3,40 @@
 import logging
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentDTM, ParsingContext
 from msconsparser.libs.edifactmsconsparser.converters import DTMSegmentConverter
 from msconsparser.libs.edifactmsconsparser.handlers import SegmentHandler
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentDTM
 
 logger = logging.getLogger(__name__)
 
 
 class DTMSegmentHandler(SegmentHandler[SegmentDTM]):
     """
-    Handler for DTM segments.
+    Handler for DTM (Date/Time/Period) segments.
+
+    This handler processes DTM segments, which specify dates, times, periods, and their 
+    function within the message. It updates the parsing context with the converted DTM 
+    segment information, appending it to the appropriate collection based on the current 
+    segment group.
     """
 
-    def __init__(self):
-        super().__init__(DTMSegmentConverter())
+    def __init__(self, syntax_parser: EdifactSyntaxHelper):
+        """
+        Initialize the DTM segment handler with the appropriate converter.
 
-    def _update_context(self, segment: SegmentDTM, current_segment_group: Optional[SegmentGroup], context: ParsingContext) -> None:
+        Args:
+            syntax_parser: The syntax parser to use for parsing segment components.
+        """
+        super().__init__(DTMSegmentConverter(syntax_parser=syntax_parser))
+
+    def _update_context(self, segment: SegmentDTM, current_segment_group: Optional[SegmentGroup],
+                        context: ParsingContext) -> None:
         """
         Update the context with the converted DTM segment.
         The update depends on the current segment group.
-        
+
         Args:
             segment: The converted DTM segment.
             current_segment_group: The current segment group.

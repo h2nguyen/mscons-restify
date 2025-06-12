@@ -21,11 +21,13 @@ class NachrichtenKennung(BaseModel):
     - Controlling agency (e.g., 'UN')
     - Association assigned code (e.g., '2.4c')
     """
-    nachrichtentyp_kennung: Optional[str] = None  # e.g., 'MSCONS' - Bericht über den Verbrauch messbarer Dienstleistungen
+    nachrichtentyp_kennung: Optional[
+        str] = None  # e.g., 'MSCONS' - Bericht über den Verbrauch messbarer Dienstleistungen
     versionsnummer_des_nachrichtentyps: Optional[str] = None  # e.g., 'D' - Entwurfs-Version
     freigabenummer_des_nachrichtentyps: Optional[str] = None  # e.g., '04B' - Ausgabe 2004-B
     verwaltende_organisation: Optional[str] = None  # e.g., 'UN' - UN/CEFACT
-    anwendungscode_der_zustaendigen_organisation: Optional[str] = None  # e.g., '2.4c' - Versionsnummer der zugrundeliegenden BDEW-Nachrichtenbeschreibung
+    anwendungscode_der_zustaendigen_organisation: Optional[
+        str] = None  # e.g., '2.4c' - Versionsnummer der zugrundeliegenden BDEW-Nachrichtenbeschreibung
 
 
 class StatusDerUebermittlung(BaseModel):

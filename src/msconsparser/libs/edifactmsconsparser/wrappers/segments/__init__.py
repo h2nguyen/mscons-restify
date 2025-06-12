@@ -3,8 +3,7 @@ Package for the MSCONS message segment models.
 """
 # Import constants
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.constants import SegmentGroup, SegmentType
-# Import context
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.context import ParsingContext
+
 # Import interchange models
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.interchange import (
     SyntaxBezeichner, Marktpartner, DatumUhrzeit,
@@ -28,7 +27,7 @@ from msconsparser.libs.edifactmsconsparser.wrappers.segments.message import (
 )
 # Import message structure models
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.message_structure import (
-    EdifactMSconsMessage, EdifactInterchange
+    EdifactMSconsMessage, EdifactInterchange, SegmentUNA
 )
 # Import partner models
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.partner import (

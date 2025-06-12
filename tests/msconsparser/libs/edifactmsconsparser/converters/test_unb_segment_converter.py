@@ -1,7 +1,9 @@
 import unittest
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNB
 from msconsparser.libs.edifactmsconsparser.converters import UNBSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentUNB
 
 
 class TestUNBSegmentConverter(unittest.TestCase):
@@ -9,20 +11,27 @@ class TestUNBSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = UNBSegmentConverter()
+        self.context = ParsingContext()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = UNBSegmentConverter(syntax_parser=self.syntax_parser)
 
     def test_convert_internal_with_all_components(self):
         """Test the _convert_internal method with all components."""
         # Arrange
         element_components = [
-            "UNB", "UNOC:3", "4012345678901:14", "4012345678901:14", 
+            "UNB", "UNOC:3", "4012345678901:14", "4012345678901:14",
             "200426:1151", "ABC4711", "", "TL", "", "", "", "1"
         ]
         last_segment_type = None
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNB)
@@ -42,14 +51,19 @@ class TestUNBSegmentConverter(unittest.TestCase):
         """Test the _convert_internal method with minimal components."""
         # Arrange
         element_components = [
-            "UNB", "UNOC:3", "4012345678901:14", "4012345678901:14", 
+            "UNB", "UNOC:3", "4012345678901:14", "4012345678901:14",
             "200426:1151", "ABC4711"
         ]
         last_segment_type = None
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentUNB)
@@ -75,7 +89,13 @@ class TestUNBSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
 
 if __name__ == '__main__':

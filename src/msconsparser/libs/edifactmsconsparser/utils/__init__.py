@@ -2,4 +2,4 @@
 """
 Package for utility classes.
 """
-from msconsparser.libs.edifactmsconsparser.utils.mscons_utils import MSCONSUtils
+from msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper import EdifactSyntaxHelper

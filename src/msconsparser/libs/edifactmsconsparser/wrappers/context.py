@@ -7,7 +7,9 @@ being processed, allowing the parser to build the message structure incrementall
 """
 from typing import Optional
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.message_structure import EdifactInterchange, EdifactMSconsMessage
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.message_structure import (
+    EdifactInterchange, EdifactMSconsMessage
+)
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.segment_group import (
     SegmentGroup1, SegmentGroup2, SegmentGroup4, SegmentGroup5,
     SegmentGroup6, SegmentGroup7, SegmentGroup8, SegmentGroup9, SegmentGroup10

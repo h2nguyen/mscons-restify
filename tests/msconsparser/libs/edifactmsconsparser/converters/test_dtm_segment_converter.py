@@ -1,8 +1,10 @@
 import unittest
 
+from msconsparser.libs.edifactmsconsparser.converters.dtm_segment_converter import DTMSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
 from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.reference import SegmentDTM
-from msconsparser.libs.edifactmsconsparser.converters.dtm_segment_converter import DTMSegmentConverter
 
 
 class TestDTMSegmentConverter(unittest.TestCase):
@@ -10,7 +12,9 @@ class TestDTMSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = DTMSegmentConverter()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = DTMSegmentConverter(syntax_parser=self.syntax_parser)
+        self.context = ParsingContext()
 
     def test_convert_internal_with_all_components(self):
         """Test the _convert_internal method with all components."""
@@ -20,7 +24,12 @@ class TestDTMSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentDTM)
@@ -37,7 +46,12 @@ class TestDTMSegmentConverter(unittest.TestCase):
         current_segment_group = SegmentGroup.SG6
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentDTM)
@@ -54,7 +68,12 @@ class TestDTMSegmentConverter(unittest.TestCase):
         current_segment_group = SegmentGroup.SG10
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentDTM)
@@ -71,7 +90,12 @@ class TestDTMSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentDTM)
@@ -90,7 +114,13 @@ class TestDTMSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=self.context
+            )
 
 
 if __name__ == '__main__':

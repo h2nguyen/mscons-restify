@@ -12,9 +12,9 @@ class ParserService:
     This service uses the ParseMessageUseCase to parse EDIFACT MSCONS messages.
     
     Attributes:
-        parse_message_usecase (ParseMessageUseCase): The use case for parsing EDIFACT MSCONS messages
+        __parse_message_usecase (ParseMessageUseCase): The use case for parsing EDIFACT MSCONS messages
     """
-    
+
     def __init__(self, parse_message_usecase: ParseMessageUseCase = None) -> None:
         """
         Initializes a new instance of the ParserService class.
@@ -25,7 +25,7 @@ class ParserService:
             parse_message_usecase (ParseMessageUseCase): The use case to use for parsing, defaults to None
         """
         self.__parse_message_usecase = parse_message_usecase or ParseMessageUseCase()
-    
+
     def parse_message(self, message_content: str, max_lines_to_parse: int = -1) -> Any:
         """
         Parses an EDIFACT MSCONS message content into a structured format.

@@ -23,7 +23,7 @@ class TestMSCONSFileEncoding(unittest.TestCase):
         mock_parsed_obj = MagicMock()
         mock_parsed_obj.model_dump.return_value = {"key": "value"}
         self.mock_parser_service.parse_message.return_value = mock_parsed_obj
-        
+
         # Create a bytes object that will fail UTF-8 decoding but succeed with ISO-8859-1
         # The byte 0xe4 is valid in ISO-8859-1 (ä) but invalid in UTF-8 as a standalone byte
         non_utf8_content = b"UNA:+.? 'UNB+UNOC:3+9904935000\xe4"
@@ -36,12 +36,12 @@ class TestMSCONSFileEncoding(unittest.TestCase):
         self.assertIsInstance(response, JSONResponse)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.body.decode(), '{"key":"value"}')
-        
+
         # Verify that the content was decoded with ISO-8859-1 after UTF-8 failed
         # The expected string should contain the ISO-8859-1 character ä (0xe4)
         expected_decoded = "UNA:+.? 'UNB+UNOC:3+9904935000ä"
         self.mock_parser_service.parse_message.assert_called_once_with(
-            message_content=expected_decoded, 
+            message_content=expected_decoded,
             max_lines_to_parse=-1
         )
 
@@ -52,7 +52,7 @@ class TestMSCONSFileEncoding(unittest.TestCase):
         mock_parsed_obj = MagicMock()
         mock_parsed_obj.model_dump.return_value = {"key": "value"}
         self.mock_parser_service.parse_message.return_value = mock_parsed_obj
-        
+
         # Create a bytes object that will fail UTF-8 decoding but succeed with ISO-8859-1
         non_utf8_content = b"UNA:+.? 'UNB+UNOC:3+9904935000\xe4"
 
@@ -65,11 +65,11 @@ class TestMSCONSFileEncoding(unittest.TestCase):
         self.assertEqual(response.body.decode(), '{"key":"value"}')
         self.assertIn("Content-Disposition", response.headers)
         self.assertIn("attachment; filename=mscons_parsed_", response.headers["Content-Disposition"])
-        
+
         # Verify that the content was decoded with ISO-8859-1 after UTF-8 failed
         expected_decoded = "UNA:+.? 'UNB+UNOC:3+9904935000ä"
         self.mock_parser_service.parse_message.assert_called_once_with(
-            message_content=expected_decoded, 
+            message_content=expected_decoded,
             max_lines_to_parse=-1
         )
 

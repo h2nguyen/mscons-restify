@@ -14,7 +14,7 @@ class MessageParserPort(ABC):
     Attributes:
         None
     """
-    
+
     @abstractmethod
     def execute(self, edifact_mscons_message_content: str, max_lines_to_parse: int = -1) -> Any:
         """

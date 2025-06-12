@@ -20,7 +20,8 @@ class TestParseMessageUseCase(unittest.TestCase):
 
     def test_init_without_parser(self):
         """Test that the use case creates a new parser if none is provided."""
-        with unittest.mock.patch('msconsparser.application.usecases.parse_message_usecase.EdifactMSCONSParser') as mock_parser_class:
+        with unittest.mock.patch(
+                'msconsparser.application.usecases.parse_message_usecase.EdifactMSCONSParser') as mock_parser_class:
             mock_parser_instance = MagicMock(spec=EdifactMSCONSParser)
             mock_parser_class.return_value = mock_parser_instance
 
@@ -47,7 +48,7 @@ class TestParseMessageUseCase(unittest.TestCase):
         self.assertEqual(result, expected_result)
         self.mock_parser.parse.assert_called_once_with(
             edifact_text=message_content,
-            max_line_to_parse=max_lines_to_parse
+            max_lines_to_parse=max_lines_to_parse
         )
 
     def test_implements_message_parser_port(self):

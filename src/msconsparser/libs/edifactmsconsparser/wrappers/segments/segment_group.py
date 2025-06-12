@@ -10,8 +10,12 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.location import SegmentLOC, SegmentCCI
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.measurement import SegmentLIN, SegmentPIA, SegmentQTY, SegmentSTS
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.partner import SegmentNAD, SegmentCTA, SegmentCOM
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.measurement import (
+    SegmentLIN, SegmentPIA, SegmentQTY, SegmentSTS
+)
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.partner import (
+    SegmentNAD, SegmentCTA, SegmentCOM
+)
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.reference import SegmentDTM, SegmentRFF
 
 

@@ -1,7 +1,9 @@
 import unittest
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments.measurement import SegmentLIN
 from msconsparser.libs.edifactmsconsparser.converters import LINSegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.measurement import SegmentLIN
 
 
 class TestLINSegmentConverter(unittest.TestCase):
@@ -9,7 +11,9 @@ class TestLINSegmentConverter(unittest.TestCase):
 
     def setUp(self):
         """Set up the test case."""
-        self.converter = LINSegmentConverter()
+        self.syntax_parser = EdifactSyntaxHelper()
+        self.converter = LINSegmentConverter(syntax_parser=self.syntax_parser)
+        self.context = ParsingContext()
 
     def test_convert_internal(self):
         """Test the _convert_internal method."""
@@ -19,7 +23,12 @@ class TestLINSegmentConverter(unittest.TestCase):
         current_segment_group = None
 
         # Act
-        result = self.converter._convert_internal(element_components, last_segment_type, current_segment_group)
+        result = self.converter._convert_internal(
+            element_components=element_components,
+            last_segment_type=last_segment_type,
+            current_segment_group=current_segment_group,
+            context=self.context
+        )
 
         # Assert
         self.assertIsInstance(result, SegmentLIN)
@@ -35,7 +44,13 @@ class TestLINSegmentConverter(unittest.TestCase):
 
         # Act & Assert
         with self.assertRaises(Exception):
-            self.converter.convert(line_number, element_components, last_segment_type, current_segment_group)
+            self.converter.convert(
+                line_number=line_number,
+                element_components=element_components,
+                last_segment_type=last_segment_type,
+                current_segment_group=current_segment_group,
+                context=ParsingContext()
+            )
 
 
 if __name__ == '__main__':

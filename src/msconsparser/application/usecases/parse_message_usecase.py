@@ -16,7 +16,7 @@ class ParseMessageUseCase(MessageParserPort):
     Attributes:
         parser (EdifactMSCONSParser): The parser used to parse EDIFACT MSCONS messages
     """
-    
+
     def __init__(self, parser: EdifactMSCONSParser = None) -> None:
         """
         Initializes a new instance of the ParseMessageUseCase class.
@@ -27,7 +27,7 @@ class ParseMessageUseCase(MessageParserPort):
             parser (EdifactMSCONSParser): The EDIFACT MSCONS parser to use, defaults to None,
         """
         self.__parser = parser or EdifactMSCONSParser()
-    
+
     def execute(self, edifact_mscons_message_content: str, max_lines_to_parse: int = -1) -> Any:
         """
         Parses an EDIFACT MSCONS message content into a structured format.
@@ -41,5 +41,5 @@ class ParseMessageUseCase(MessageParserPort):
         """
         return self.__parser.parse(
             edifact_text=edifact_mscons_message_content,
-            max_line_to_parse=max_lines_to_parse
+            max_lines_to_parse=max_lines_to_parse
         )

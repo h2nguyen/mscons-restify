@@ -9,7 +9,7 @@ This document provides guidelines and instructions for developing and maintainin
 This Python project uses [OpenAPI Generator](https://openapi-generator.tech) to generate the API endpoints (DTOs and
 router endpoints) while the core business logic is manually created following a clean (hexagonal) architecture pattern:
 
-- API version: 1.204c.2
+- API version: 1.204c.3
 - Generator version: 7.14.0-SNAPSHOT
 - Build package: org.openapitools.codegen.languages.PythonFastAPIServerCodegen
 
@@ -104,6 +104,12 @@ To run the server on a Docker container, please execute the following from the r
    ```
 
    This will start the service on port 8000, which maps to the internal port 8000.
+
+
+> **Performance Optimization**:
+> 
+> The project is configured to use Docker Compose's bake feature for better build performance.
+> This is enabled by the `COMPOSE_BAKE=true` environment variable in the `.env` file. No additional action is required.
 
 ## Testing Information
 
@@ -208,7 +214,7 @@ To run the server on a Docker container, please execute the following from the r
          │               ├── converters       # Contains segment converters
          │               ├── exceptions       # Contains parser-specific exceptions
          │               ├── handlers         # Contains segment handlers
-         │               ├── utils            # Contains utility functions
+         │               ├── utils            # Contains utility and helper functions
          │               └── wrappers         # Contains library model wrappers
          │                   └── segments     # Contains segment model definitions
          └── tests                            # Contain all tests of the project
@@ -223,9 +229,9 @@ To run the server on a Docker container, please execute the following from the r
    - The parser uses a dispatcher pattern to handle different segment types
    - Each segment type has its own converter in `libs/edifactmsconsparser/converters` and handlers in `libs/edifactmsconsparser/handlers`
    - The main parser class is `EdifactMSCONSParser` in `libs/edifactmsconsparser/edifact_mscons_parser.py`
-   - Domain models are located in `libs/edifactmsconsparser/wrappers/segments`
-   - For a detailed explanation of the parsing process, see [mscons-parsing-process.md](docs/mscons-parsing-process.md)
+   - Domain models are located in `libs/edifactmsconsparser/wrappers/segments` 
    - Library related exceptions are defined in `libs/edifactmsconsparser/exceptions` and use these exceptions for library-specific error handling
+   - For a detailed explanation of the parsing process, see [mscons-parsing-process.md](docs/mscons-parsing-process.md)
 
 4. **API Implementation**:
    - The API is implemented using FastAPI
@@ -253,7 +259,7 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/) principles
 
 The version format is `MAJOR.MINOR.PATCH` where:
 
-    1.204c.2
+    1.204c.3
     |  |   |
     1  |   | -> **MAJOR**: Incremented when making incompatible API changes
       204c | -> **MINOR**: Contains the MSCONS specification version (e.g., "204c" for MSCONS version 2.4c, the 0-placeholder was added, in case the minor version of MSCONS-specs is getting greater than 9x, e.g. 3.10a => 2.310c.0)
@@ -267,8 +273,8 @@ The current version can be found in the [pyproject.toml](pyproject.toml) file.
 
 There are two important places specifiying the version numbers in this project:
 
-1. **Project Version**: Defined in `pyproject.toml` (e.g., `1.204c.2`)
-2. **API Version**: Defined in the OpenAPI specification (e.g., `1.204c.2`)
+1. **Project Version**: Defined in `pyproject.toml` (e.g., `1.204c.3`)
+2. **API Version**: Defined in the OpenAPI specification (e.g., `1.204c.3`)
 
 Please ensure those places contain the same version number.
 

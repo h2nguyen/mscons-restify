@@ -40,7 +40,7 @@ class SegmentNAD(BaseModel):
     - 'MR': Message recipient (Nachrichtenempfänger)
     - 'DP': Delivery party (Lieferant)
     """
-    bezeichner: Optional[str] = None  # technical field
+    bezeichner: Optional[str] = None  # NON-EDIFACT custom technical field
     beteiligter_qualifier: Optional[str] = None  # e.g., 'MS' Nachrichtenabsender, 'MR' Nachrichtenempfänger
     identifikation_des_beteiligten: Optional[IdentifikationDesBeteiligten] = None
 
@@ -95,5 +95,3 @@ class SegmentCOM(BaseModel):
     such as telephone numbers or email addresses, with qualifiers to identify the type.
     """
     kommunikationsverbindung: Optional[Kommunikationsverbindung] = None
-
-

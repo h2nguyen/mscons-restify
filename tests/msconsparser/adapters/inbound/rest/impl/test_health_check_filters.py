@@ -15,9 +15,9 @@ class TestHealthEndpointsFilter(unittest.TestCase):
         """Test that the filter allows messages not related to health endpoints."""
         record = MagicMock()
         record.getMessage.return_value = "Some regular log message"
-        
+
         result = self.filter.filter(record)
-        
+
         self.assertTrue(result, "Filter should allow non-health endpoint messages")
 
     def test_filter_blocks_health_200_messages(self):
@@ -27,13 +27,13 @@ class TestHealthEndpointsFilter(unittest.TestCase):
             "GET /health/liveness HTTP/1.1 200",
             "GET /metrics HTTP/1.1 200"
         ]
-        
+
         for message in test_cases:
             record = MagicMock()
             record.getMessage.return_value = message
-            
+
             result = self.filter.filter(record)
-            
+
             self.assertFalse(result, f"Filter should block health endpoint 200 message: {message}")
 
     def test_filter_allows_health_non_200_messages(self):
@@ -43,13 +43,13 @@ class TestHealthEndpointsFilter(unittest.TestCase):
             "GET /health/liveness HTTP/1.1 404",
             "GET /metrics HTTP/1.1 503"
         ]
-        
+
         for message in test_cases:
             record = MagicMock()
             record.getMessage.return_value = message
-            
+
             result = self.filter.filter(record)
-            
+
             self.assertTrue(result, f"Filter should allow health endpoint non-200 message: {message}")
 
     def test_filter_handles_type_error(self):
@@ -57,9 +57,9 @@ class TestHealthEndpointsFilter(unittest.TestCase):
         record = MagicMock()
         record.getMessage.side_effect = TypeError("Test error")
         record.msg = "Some message that doesn't match health endpoints"
-        
+
         result = self.filter.filter(record)
-        
+
         self.assertTrue(result, "Filter should handle TypeError and use record.msg instead")
 
 

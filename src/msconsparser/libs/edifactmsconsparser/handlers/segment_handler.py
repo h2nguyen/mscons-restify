@@ -3,8 +3,9 @@
 from abc import ABC, abstractmethod
 from typing import Optional, TypeVar, Generic
 
-from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, ParsingContext
 from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup
 
 T = TypeVar('T')
 
@@ -51,7 +52,8 @@ class SegmentHandler(ABC, Generic[T]):
             line_number=line_number,
             element_components=element_components,
             last_segment_type=last_segment_type,
-            current_segment_group=current_segment_group
+            current_segment_group=current_segment_group,
+            context=context
         )
 
         # Update the context with the converted segment
@@ -71,7 +73,8 @@ class SegmentHandler(ABC, Generic[T]):
         return context.current_message is not None
 
     @abstractmethod
-    def _update_context(self, segment: T, current_segment_group: Optional[SegmentGroup], context: ParsingContext) -> None:
+    def _update_context(self, segment: T, current_segment_group: Optional[SegmentGroup],
+                        context: ParsingContext) -> None:
         """
         Update the context with the converted segment.
 
