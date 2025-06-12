@@ -9,7 +9,7 @@ This document provides guidelines and instructions for developing and maintainin
 This Python project uses [OpenAPI Generator](https://openapi-generator.tech) to generate the API endpoints (DTOs and
 router endpoints) while the core business logic is manually created following a clean (hexagonal) architecture pattern:
 
-- API version: 1.204c.2
+- API version: 1.204c.3
 - Generator version: 7.14.0-SNAPSHOT
 - Build package: org.openapitools.codegen.languages.PythonFastAPIServerCodegen
 
@@ -259,7 +259,7 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/) principles
 
 The version format is `MAJOR.MINOR.PATCH` where:
 
-    1.204c.2
+    1.204c.3
     |  |   |
     1  |   | -> **MAJOR**: Incremented when making incompatible API changes
       204c | -> **MINOR**: Contains the MSCONS specification version (e.g., "204c" for MSCONS version 2.4c, the 0-placeholder was added, in case the minor version of MSCONS-specs is getting greater than 9x, e.g. 3.10a => 2.310c.0)
@@ -273,8 +273,8 @@ The current version can be found in the [pyproject.toml](pyproject.toml) file.
 
 There are two important places specifiying the version numbers in this project:
 
-1. **Project Version**: Defined in `pyproject.toml` (e.g., `1.204c.2`)
-2. **API Version**: Defined in the OpenAPI specification (e.g., `1.204c.2`)
+1. **Project Version**: Defined in `pyproject.toml` (e.g., `1.204c.3`)
+2. **API Version**: Defined in the OpenAPI specification (e.g., `1.204c.3`)
 
 Please ensure those places contain the same version number.
 

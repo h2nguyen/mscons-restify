@@ -1,6 +1,6 @@
 [project]
 name = "MSCONSRestify"
-version = "1.204c.2"
+version = "1.204c.3"
 description = "The EDIFACT MSCONS parser rest-api application (MSCONSRestify) parsing EDIFACT MSCONS messages (energy sector, DE/AT/CH) based on version [2.4c](https://bdew-mako.de/linkPdf/9645)."
 authors = [
     { name="Viet Hai Nguyen", email="me@viethainguyen.de" }
