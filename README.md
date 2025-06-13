@@ -264,7 +264,7 @@ The version format is `MAJOR.MINOR.PATCH` where:
     |  |   |
     1  |   | -> **MAJOR**: Incremented when making incompatible API changes
       204c | -> **MINOR**: Contains the MSCONS specification version (e.g., "204c" for MSCONS version 2.4c, the 0-placeholder was added, in case the minor version of MSCONS-specs is getting greater than 9x, e.g. 3.10a => 2.310c.0)
-           2 -> **PATCH**: Incremented when making backward compatible bug fixes
+           3 -> **PATCH**: Incremented when making backward compatible bug fixes
 
 ### Current Version
 
