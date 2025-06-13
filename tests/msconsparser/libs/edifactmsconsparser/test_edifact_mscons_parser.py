@@ -25,7 +25,7 @@ class TestEdifactMSCONSParser(unittest.TestCase):
 
         # Assert
         self.assertIsNotNone(result)
-        self.assertEqual(0, self.parser._EdifactMSCONSParser__context.segment_count)
+        self.assertEqual(1, self.parser._EdifactMSCONSParser__context.segment_count)
 
     @patch('msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper.EdifactSyntaxHelper.split_segments')
     @patch('msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper.EdifactSyntaxHelper.split_elements')

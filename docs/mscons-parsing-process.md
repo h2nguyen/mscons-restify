@@ -60,15 +60,23 @@ participant "ParsingContext" as Context
 Client -> Parser: parse(edifact_text, max_lines_to_parse)
 activate Parser
 
-Parser -> Parser: extract_and_process_una_segment()
-note right: If UNA segment is found,\nextract and process it\nto set custom delimiters
+Parser -> Parser: __initialize_una_segment_logic_return_if_has_una_segment()
+note right: Checks for UNA segment at the beginning\nor in the middle of the text\nand processes it to set custom delimiters
 
-Parser -> SyntaxHelper: split_segments(edifact_text)
+Parser -> SyntaxHelper: split_segments(string_content, context)
 activate SyntaxHelper
 SyntaxHelper --> Parser: segments
 deactivate SyntaxHelper
 
 loop for each segment
+    Parser -> Context: segment_count += 1
+
+    Parser -> SyntaxHelper: remove_invalid_prefix_from_segment_data(segment, segment_types, context)
+    activate SyntaxHelper
+    note right: Removes any invalid prefix\nfrom the segment data
+    SyntaxHelper --> Parser: cleaned_segment
+    deactivate SyntaxHelper
+
     Parser -> Parser: split_elements(segment)
     Parser -> Parser: get_segment_group(segment_type, context)
 
@@ -103,17 +111,20 @@ deactivate Parser
 The parsing process follows these steps:
 
 1. The raw EDIFACT text is passed to the `EdifactMSCONSParser.parse()` method
-2. The parser checks if the text starts with a UNA segment (Service String Advice)
-   - If a UNA segment is found, it's extracted and processed to set custom delimiters
-   - The UNA segment is removed from the text to avoid processing it again
-3. The parser splits the text into segments using `EdifactSyntaxHelper.split_segments()`
-4. For each segment:
+2. The parser initializes segment types from the `SegmentType` enum
+3. The parser checks for a UNA segment (Service String Advice) at the beginning or in the middle of the text
+   - If a UNA segment is found, it's processed to set custom delimiters
+   - The UNA segment is flagged to be skipped during segment processing
+4. The parser splits the text into segments using `EdifactSyntaxHelper.split_segments()`
+5. For each segment:
+   - The segment count in the context is incremented
+   - Any invalid prefix is removed from the segment data using `EdifactSyntaxHelper.remove_invalid_prefix_from_segment_data()`
    - The segment type is determined from the first element
    - The segment group is determined based on the segment type and current context
    - A handler for the segment type is retrieved from the `SegmentHandlerFactory`
    - The handler uses its converter to transform the segment data into a context object
    - The handler updates the parsing context with the converted segment
-5. The parser returns the completed `EdifactInterchange` object
+6. The parser returns the completed `EdifactInterchange` object
 
 ## EDIFACT Format Structure
 
@@ -233,7 +244,15 @@ Handlers are created and managed by the `SegmentHandlerFactory`, which maintains
 All segment handlers extend the abstract `SegmentHandler` class, which provides common functionality:
 
 ```python
-class SegmentHandler(Generic[T]):
+from abc import ABC, abstractmethod
+from typing import Optional, TypeVar, Generic
+from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup
+
+T = TypeVar('T')
+
+class SegmentHandler(ABC, Generic[T]):
     """
     Abstract base class for segment handlers.
 
@@ -354,6 +373,34 @@ class BGMSegmentHandler(SegmentHandler[SegmentBGM]):
 Handlers are registered in the `SegmentHandlerFactory` class, which maintains a mapping of segment types to handler instances:
 
 ```python
+import logging
+from typing import Dict, Optional
+
+# Keep this style to avoid circular imports
+from msconsparser.libs.edifactmsconsparser.utils.edifact_syntax_helper import EdifactSyntaxHelper
+
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.constants import SegmentType
+
+from msconsparser.libs.edifactmsconsparser.handlers.segment_handler import SegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.bgm_segment_handler import BGMSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.cci_segment_handler import CCISegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.com_segment_handler import COMSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.cta_segment_handler import CTASegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.dtm_segment_handler import DTMSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.lin_segment_handler import LINSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.loc_segment_handler import LOCSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.nad_segment_handler import NADSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.pia_segment_handler import PIASegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.qty_segment_handler import QTYSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.rff_segment_handler import RFFSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.sts_segment_handler import STSSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.una_segment_handler import UNASegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unb_segment_handler import UNBSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unh_segment_handler import UNHSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.uns_segment_handler import UNSSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unt_segment_handler import UNTSegmentHandler
+from msconsparser.libs.edifactmsconsparser.handlers.unz_segment_handler import UNZSegmentHandler
+
 def __register_handlers(self, syntax_parser: EdifactSyntaxHelper) -> None:
     """
     Initialize and register the handlers dictionary with instances of all segment handlers.
@@ -401,7 +448,18 @@ Converters implement the `SegmentConverter` abstract base class, which provides:
 3. A helper method `_get_identifier_name()` for mapping qualifier codes to human-readable names
 
 ```python
-class SegmentConverter(Generic[T]):
+import logging
+from abc import ABC, abstractmethod
+from typing import Optional, TypeVar, Generic
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.exceptions import MSCONSParserException
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup
+
+logger = logging.getLogger(__name__)
+T = TypeVar('T')
+
+class SegmentConverter(ABC, Generic[T]):
     """
     Abstract base class for segment converters.
 
@@ -470,18 +528,18 @@ class SegmentConverter(Generic[T]):
         """
         pass
 
-    def _get_identifier_name(self, qualifier_code: str, qualifier_map: Dict[str, str]) -> str:
+    def _get_identifier_name(self, qualifier_code: str, current_segment_group: Optional[SegmentGroup]) -> Optional[str]:
         """
         Map a qualifier code to a human-readable name.
 
         Args:
             qualifier_code: The qualifier code to map
-            qualifier_map: A dictionary mapping qualifier codes to names
+            current_segment_group: The current segment group being processed
 
         Returns:
             The human-readable name for the qualifier code, or the code itself if not found
         """
-        return qualifier_map.get(qualifier_code, qualifier_code)
+        return str(qualifier_code + current_segment_group)
 ```
 
 ### Example: BGM Segment Converter
@@ -564,6 +622,11 @@ To create a new converter for a segment type:
 For example, to create a converter for a new segment type "XYZ":
 
 ```python
+from typing import Optional
+from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+
 class XYZSegmentConverter(SegmentConverter[SegmentXYZ]):
     def __init__(self, syntax_parser: EdifactSyntaxHelper):
         super().__init__(syntax_parser=syntax_parser)
@@ -600,6 +663,15 @@ The `ParsingContext` contains:
 4. A method to reset the context for a new message
 
 ```python
+from typing import Optional
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.message_structure import (
+EdifactInterchange, EdifactMSconsMessage
+)
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.segment_group import (
+    SegmentGroup1, SegmentGroup2, SegmentGroup4, SegmentGroup5,
+    SegmentGroup6, SegmentGroup7, SegmentGroup8, SegmentGroup9, SegmentGroup10
+)
+
 class ParsingContext:
     """
     The context that yields all relevant intermittent states during the parsing process.
@@ -631,21 +703,19 @@ class ParsingContext:
         self.current_sg8: Optional[SegmentGroup8] = None
         self.current_sg9: Optional[SegmentGroup9] = None
         self.current_sg10: Optional[SegmentGroup10] = None
-        self.segment_count = 0  # Segment counter for each message
+        self.segment_count = 0  # Segment counter for the interchange file
 
     def reset_for_new_message(self):
         """
         Reset the context for a new message.
 
         This method is called when a new message is started (typically when a UNH segment
-        is encountered). It resets all current segment group references to None and
-        initializes the segment counter to 1 (counting the UNH segment).
+        is encountered). It resets all current segment group references to None.
 
         According to the MSCONS D.04B 2.4c standard, each message starts with a UNH segment
         and has its own hierarchy of segment groups, so the context needs to be reset
         for each new message.
         """
-        self.segment_count = 1  # Reset the segment counter (counting the UNH segment)
         self.current_message: Optional[EdifactMSconsMessage] = None
         self.current_sg1: Optional[SegmentGroup1] = None
         self.current_sg2: Optional[SegmentGroup2] = None
@@ -711,7 +781,8 @@ To extend the parser to support a new segment type, follow these steps:
 2. **Create a context model for the segment**:
    Create a new class in one of the files in `libs/edifactmsconsparser/wrappers/segments/` (e.g., `message.py`, `interchange.py`):
    ```python
-   @dataclass
+   from typing import Optional
+   
    class SegmentXYZ:
        """
        XYZ segment - Your segment description
@@ -734,6 +805,12 @@ To extend the parser to support a new segment type, follow these steps:
 4. **Implement a converter for the segment**:
    Create a new converter in the `libs/edifactmsconsparser/converters` directory:
    ```python
+   from typing import Optional
+   from msconsparser.libs.edifactmsconsparser.converters import SegmentConverter
+   from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+   from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+   from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup
+   
    class XYZSegmentConverter(SegmentConverter[SegmentXYZ]):
        def __init__(self, syntax_parser: EdifactSyntaxHelper):
            super().__init__(syntax_parser=syntax_parser)
@@ -759,6 +836,13 @@ To extend the parser to support a new segment type, follow these steps:
 5. **Implement a handler for the segment**:
    Create a new handler in the `libs/edifactmsconsparser/handlers` directory:
    ```python
+   from typing import Optional
+
+   from msconsparser.libs.edifactmsconsparser.handlers import SegmentHandler
+   from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+   from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
+   from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup
+
    class XYZSegmentHandler(SegmentHandler[SegmentXYZ]):
        def __init__(self, syntax_parser: EdifactSyntaxHelper):
            super().__init__(XYZSegmentConverter(syntax_parser=syntax_parser))
@@ -777,6 +861,9 @@ To extend the parser to support a new segment type, follow these steps:
 6. **Register the handler**:
    Add the new handler to `SegmentHandlerFactory.__register_handlers()` in `libs/edifactmsconsparser/handlers/segment_handler_factory.py`:
    ```python
+   from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType
+   from msconsparser.libs.edifactmsconsparser.utils import EdifactSyntaxHelper
+   
    def __register_handlers(self, syntax_parser: EdifactSyntaxHelper) -> None:
        # Initialize handlers for each segment type
        self.__handlers = {
@@ -788,6 +875,9 @@ To extend the parser to support a new segment type, follow these steps:
 7. **Update segment group determination**:
    If the new segment affects segment group determination, update the `get_segment_group()` method in `EdifactMSCONSParser` in `libs/edifactmsconsparser/edifact_mscons_parser.py`:
    ```python
+   from typing import Optional
+   from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentGroup, SegmentType
+
    @staticmethod
    def get_segment_group(
            current_segment_type: str,
@@ -827,10 +917,16 @@ To modify the behavior of an existing segment type:
 Some segments, like UNA (Service String Advice), require special handling:
 
 1. **UNA Segment**: The UNA segment defines the delimiters used in the EDIFACT message and must be processed before any other segments.
-   - The parser checks for a UNA segment at the beginning of the file before splitting the text into segments
-   - If found, it extracts the UNA segment, processes it to set custom delimiters, and removes it from the text
+   - The parser checks for a UNA segment at the beginning of the file or somewhere in the middle of the text before splitting the text into segments
+   - If found, it processes the UNA segment to set custom delimiters and flags it to be skipped during segment processing
    - The UNA segment handler updates the parsing context’s UNA segment based on the custom delimiters defined in the UNA segment itself
    - This ensures that all subsequent segments are parsed correctly using the custom delimiters
+
+2. **Invalid Prefixes**: The parser can handle segments with invalid prefixes.
+   - For each segment, the parser checks if it starts with a valid segment type
+   - If not, it looks for a valid segment type within the segment data
+   - If found, it removes the invalid prefix and logs a warning
+   - This allows the parser to handle malformed EDIFACT messages that may have been corrupted or modified
 
 For segments that require special handling:
 
@@ -841,12 +937,25 @@ For segments that require special handling:
 ### Example: Special Handling for UNA Segment
 
 ```python
-def __extract_and_process_una_segment(self, edifact_text):
-    # Check for UNA segment at the beginning of the file
-    if edifact_text.startswith(SegmentType.UNA):
-        # Extract the UNA segment (always 9 characters long)
-        una_segment = edifact_text[:EdifactConstants.UNA_SEGMENT_MAX_LENGTH]
+from typing import Optional
+from msconsparser.libs.edifactmsconsparser.wrappers.segments import SegmentType
+from msconsparser.libs.edifactmsconsparser.wrappers.segments.constants import EdifactConstants
 
+logger = logging.getLogger(__name__)
+   
+def __initialize_una_segment_logic_return_if_has_una_segment(self, edifact_text: str) -> bool:
+    una_segment: Optional[str] = None
+    # Check for the UNA segment at the beginning of the text
+    if edifact_text.startswith(SegmentType.UNA):
+        una_segment = edifact_text[:EdifactConstants.UNA_SEGMENT_MAX_LENGTH]
+    else:
+        # Check for UNA segment is somewhere in the middle of the text
+        index = edifact_text.find(SegmentType.UNA)
+        if index > 0:
+            logger.warning(f"Removing invalid prefix from UNA segment '{edifact_text[:index]}'")
+            una_segment = edifact_text[index:EdifactConstants.UNA_SEGMENT_MAX_LENGTH]
+
+    if una_segment:
         # Process the UNA segment to set the delimiters
         una_handler = self.__handler_factory.get_handler(SegmentType.UNA)
         if una_handler:
@@ -857,10 +966,7 @@ def __extract_and_process_una_segment(self, edifact_text):
                 current_segment_group=None,
                 context=self.__context
             )
-
-        # Remove the UNA segment from the text to avoid processing it again
-        edifact_text = edifact_text[EdifactConstants.UNA_SEGMENT_MAX_LENGTH:]
-    return edifact_text
+    return una_segment is not None
 ```
 
 ## Error Handling and Validation
@@ -872,6 +978,8 @@ The parser includes robust error handling and validation to ensure that MSCONS m
 The parser uses a custom exception class `MSCONSParserException` for reporting parsing errors:
 
 ```python
+from typing import Optional
+
 class MSCONSParserException(Exception):
     """
     Exception raised for errors during MSCONS parsing.
@@ -961,7 +1069,7 @@ When debugging parsing issues:
    - Check the `get_segment_group()` method in `EdifactMSCONSParser` to ensure it correctly determines the segment group for the segment type.
 
 4. **Custom delimiters not recognized**: 
-   - Verify that the UNA segment is at the beginning of the message.
+   - Verify that the UNA segment is present in the message (it can be at the beginning or in the middle).
    - Check that the UNA segment handler correctly updates the context with the custom delimiters.
 
 5. **Missing or incorrect data in the parsed result**: 

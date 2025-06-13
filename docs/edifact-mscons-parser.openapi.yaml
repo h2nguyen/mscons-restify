@@ -2,7 +2,7 @@ openapi: 3.1.1
 
 info:
   title: MSCONSRestify - a Rest-API for parsing EDIFACT MSCONS messages
-  version: 1.204c.3
+  version: 1.204c.4
   description: |
     This [OpenAPI-Spezifikation](https://www.openapis.org/) describes the Rest-API of MSCONSRestify,
     a REST API application that uses the EDIFACT MSCONS Parser library for

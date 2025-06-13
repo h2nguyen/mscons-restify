@@ -1,6 +1,14 @@
 # coding: utf-8
+
+import logging
+from typing import Optional
+
 from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.constants import EdifactConstants
+from msconsparser.libs.edifactmsconsparser.exceptions.parser_exceptions import MSCONSParserException
+
+
+logger = logging.getLogger(__name__)
 
 
 class EdifactSyntaxHelper:
@@ -203,6 +211,61 @@ class EdifactSyntaxHelper:
             escape_symbol=EdifactSyntaxHelper.get_release_indicator(context),
             delimiter=EdifactSyntaxHelper.get_element_separator(context)
         )
+
+    @staticmethod
+    def remove_invalid_prefix_from_segment_data(
+            string_content: str,
+            segment_types: Optional[list[str]],
+            context: ParsingContext,
+    ) -> str:
+        """
+        Removes invalid prefixes from EDIFACT segment data.
+
+        Sometimes EDIFACT messages contain invalid prefixes before the segment type
+        which are not part of the actual EDIFACT message. This method removes any arbitrary prefix
+        that appears before a valid segment type.
+
+        The method works by:
+        1. First checking if the string starts with any valid segment type (using the faster startswith method)
+        2. If no segment type is found at the beginning, it searches for segment types anywhere in the string
+        3. If a segment type is found, it removes everything before that segment type
+        4. If no segment type is found, it returns the original string
+
+        Examples:
+            - "[${test(TEST_DATA)}]:UNB+..." becomes "UNB+..."
+            - "SOME_PREFIX:UNH+..." becomes "UNH+..."
+            - "UNB+..." remains "UNB+..." (no prefix to remove)
+            - "INVALID_DATA_WITHOUT_SEGMENT_TYPE" remains unchanged
+
+        Args:
+            string_content: The input string that may contain an invalid prefix.
+            segment_types: A list of valid segment types. Must not be None, or an exception will be raised.
+            context: The parsing context to retrieve.
+
+        Returns:
+            The string with the invalid prefix is removed, if present.
+
+        Raises:
+            MSCONSParserException: If segment_types is None.
+        """
+        if segment_types is None or len(segment_types) == 0:
+            raise MSCONSParserException("Segment types must not be None nor empty")
+
+        if not string_content:
+            return string_content
+
+        for segment_type in segment_types:
+            if string_content.startswith(segment_type):
+                return string_content
+
+        for segment_type in segment_types:
+            index = string_content.find(segment_type)
+            if index > 0:
+                line_number = context.segment_count
+                logger.warning(f"L{line_number} -> Removing invalid prefix from segment data '{string_content[:index]}' from '{string_content}'")
+                return string_content[index:]
+
+        return string_content
 
     @staticmethod
     def __escape_split(
