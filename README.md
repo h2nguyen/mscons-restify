@@ -231,7 +231,8 @@ To run the server on a Docker container, please execute the following from the r
    - The main parser class is `EdifactMSCONSParser` in `libs/edifactmsconsparser/edifact_mscons_parser.py`
    - Domain models are located in `libs/edifactmsconsparser/wrappers/segments` 
    - Library related exceptions are defined in `libs/edifactmsconsparser/exceptions` and use these exceptions for library-specific error handling
-   - For a detailed explanation of the parsing process, see [mscons-parsing-process.md](docs/mscons-parsing-process.md)
+   - For a detailed explanation of the parsing process, see [MSCONS Parsing Process Documentation](docs/mscons-parsing-process.md)
+   - For information about how the parser fits into the overall system architecture, see [Architecture Documentation](docs/architecture.md)
 
 4. **API Implementation**:
    - The API is implemented using FastAPI
@@ -283,6 +284,14 @@ Please ensure those places contain the same version number.
 - Increment the **MAJOR** version when you make incompatible API changes
 - Update the **MINOR** version when the supported MSCONS specification version changes
 - Increment the **PATCH** version when you make backward compatible bug fixes or enhancements
+
+## Documentation
+
+The project includes comprehensive documentation:
+
+- [Architecture Documentation](docs/architecture.md): Provides an overview of the system architecture, including the hexagonal architecture pattern, building blocks, and architectural decisions.
+- [MSCONS Parsing Process Documentation](docs/mscons-parsing-process.md): Describes the business logic for parsing EDIFACT MSCONS messages, including the parser architecture, segment types, handlers, converters, and how to extend the parser.
+- [API Generation Documentation](docs/generate-openapi-endpoints.md): Explains how to generate the API endpoints from the OpenAPI specification.
 
 ## Last words
 

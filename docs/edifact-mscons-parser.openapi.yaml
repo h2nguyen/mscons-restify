@@ -4,7 +4,8 @@ info:
   title: MSCONSRestify - a Rest-API for parsing EDIFACT MSCONS messages
   version: 1.204c.3
   description: |
-    This [OpenAPI-Spezifikation](https://www.openapis.org/) describes the Rest-API of the EDIFACT MSCONS parser (MSCONSRestify),
+    This [OpenAPI-Spezifikation](https://www.openapis.org/) describes the Rest-API of MSCONSRestify,
+    a REST API application that uses the EDIFACT MSCONS Parser library for
     parsing EDIFACT MSCONS messages (energy sector, DE/AT/CH) based on version [2.4c](https://bdew-mako.de/linkPdf/9645).
   license:
     name: Apache License, Version 2.0
