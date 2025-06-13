@@ -1,7 +1,15 @@
 # coding: utf-8
+
+import logging
+from typing import Optional
+
 from msconsparser.libs.edifactmsconsparser.wrappers import ParsingContext
 from msconsparser.libs.edifactmsconsparser.wrappers.segments.constants import EdifactConstants
 from msconsparser.libs.edifactmsconsparser.exceptions.parser_exceptions import MSCONSParserException
+
+
+logger = logging.getLogger(__name__)
+
 
 class EdifactSyntaxHelper:
     """
@@ -205,7 +213,11 @@ class EdifactSyntaxHelper:
         )
 
     @staticmethod
-    def remove_invalid_prefix_from_segment_data(string_content: str, segment_types: list[str] = None) -> str:
+    def remove_invalid_prefix_from_segment_data(
+            string_content: str,
+            segment_types: Optional[list[str]],
+            context: ParsingContext,
+    ) -> str:
         """
         Removes invalid prefixes from EDIFACT segment data.
 
@@ -228,6 +240,7 @@ class EdifactSyntaxHelper:
         Args:
             string_content: The input string that may contain an invalid prefix.
             segment_types: A list of valid segment types. Must not be None, or an exception will be raised.
+            context: The parsing context to retrieve.
 
         Returns:
             The string with the invalid prefix is removed, if present.
@@ -235,7 +248,7 @@ class EdifactSyntaxHelper:
         Raises:
             MSCONSParserException: If segment_types is None.
         """
-        if segment_types is None:
+        if segment_types is None or len(segment_types) == 0:
             raise MSCONSParserException("Segment types must not be None nor empty")
 
         if not string_content:
@@ -248,6 +261,8 @@ class EdifactSyntaxHelper:
         for segment_type in segment_types:
             index = string_content.find(segment_type)
             if index > 0:
+                line_number = context.segment_count
+                logger.warning(f"L{line_number} -> Removing invalid prefix from segment data '{string_content[:index]}' from '{string_content}'")
                 return string_content[index:]
 
         return string_content

@@ -47,7 +47,7 @@ class ParsingContext:
         self.current_sg8: Optional[SegmentGroup8] = None
         self.current_sg9: Optional[SegmentGroup9] = None
         self.current_sg10: Optional[SegmentGroup10] = None
-        self.segment_count = 0  # Segment counter for each message
+        self.segment_count = 0  # Segment counter for the interchange file
 
     def reset_for_new_message(self):
         """
@@ -61,7 +61,6 @@ class ParsingContext:
         and has its own hierarchy of segment groups, so the context needs to be reset
         for each new message.
         """
-        self.segment_count = 1  # Reset the segment counter (counting the UNH segment)
         self.current_message: Optional[EdifactMSconsMessage] = None
         self.current_sg1: Optional[SegmentGroup1] = None
         self.current_sg2: Optional[SegmentGroup2] = None

@@ -147,13 +147,20 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = "[${test(TEST_DATA)}]:UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
         expected = "UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types, self.context))
 
     def test_remove_invalid_prefix_none_segment_types(self):
         """Test remove_invalid_prefix_from_segment_data with None segment_types."""
         test_data = "[${test(TEST_DATA)}]:UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
         with self.assertRaises(MSCONSParserException) as context:
-            self.parser.remove_invalid_prefix_from_segment_data(test_data)
+            self.parser.remove_invalid_prefix_from_segment_data(test_data, None, self.context)
+        self.assertTrue("Segment types must not be None nor empty" in str(context.exception))
+
+    def test_remove_invalid_prefix_empty_segment_types(self):
+        """Test remove_invalid_prefix_from_segment_data with None segment_types."""
+        test_data = "[${test(TEST_DATA)}]:UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
+        with self.assertRaises(MSCONSParserException) as context:
+            self.parser.remove_invalid_prefix_from_segment_data(test_data, [], self.context)
         self.assertTrue("Segment types must not be None nor empty" in str(context.exception))
 
     def test_remove_invalid_prefix_arbitrary_prefix(self):
@@ -162,7 +169,7 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = "SOME_RANDOM_PREFIX:UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
         expected = "UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types, self.context))
 
     def test_remove_invalid_prefix_different_segment_type(self):
         """Test remove_invalid_prefix_from_segment_data with a prefix before a different segment type."""
@@ -170,7 +177,7 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = "ANOTHER_PREFIX:UNH+12345+MSCONS:D:96A:UN:EAN005'"
         expected = "UNH+12345+MSCONS:D:96A:UN:EAN005'"
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types, self.context))
 
     def test_remove_invalid_prefix_no_prefix(self):
         """Test remove_invalid_prefix_from_segment_data without any prefix."""
@@ -178,7 +185,7 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = "UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
         expected = "UNB+UNOC:3+9911845000009:500+9901000000001:500+250602:2158+9QF2J8QT6RJCAO++EM'"
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types, self.context))
 
     def test_remove_invalid_prefix_empty_string(self):
         """Test remove_invalid_prefix_from_segment_data with an empty string."""
@@ -186,7 +193,7 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = ""
         expected = ""
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types, self.context))
 
     def test_remove_invalid_prefix_no_segment_type(self):
         """Test remove_invalid_prefix_from_segment_data with a string that doesn't contain any valid segment type."""
@@ -194,7 +201,7 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = "INVALID_DATA_WITHOUT_SEGMENT_TYPE"
         expected = "INVALID_DATA_WITHOUT_SEGMENT_TYPE"
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, segment_types, self.context))
 
     def test_remove_invalid_prefix_custom_segment_types(self):
         """Test remove_invalid_prefix_from_segment_data with custom segment types."""
@@ -202,7 +209,7 @@ class TestEdifactSyntaxHelper(unittest.TestCase):
 
         test_data = "PREFIX:CUSTOM+DATA"
         expected = "CUSTOM+DATA"
-        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, custom_segment_types))
+        self.assertEqual(expected, self.parser.remove_invalid_prefix_from_segment_data(test_data, custom_segment_types, self.context))
 
 
 if __name__ == '__main__':

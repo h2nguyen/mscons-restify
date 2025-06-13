@@ -39,9 +39,11 @@ class EdifactMSCONSParser:
         if edifact_text is None:
             raise MSCONSParserException("No valid parsing input. Input was", str(edifact_text))
 
-        edifact_text = self.__extract_and_process_una_segment(edifact_text)
+        segment_types = [segment_type.value for segment_type in SegmentType]
 
-        segments = self.__syntax_parser.split_segments(edifact_text, self.__context)
+        has_una_segment = self.__initialize_una_segment_logic_return_if_has_una_segment(edifact_text=edifact_text)
+
+        segments = self.__syntax_parser.split_segments(string_content=edifact_text, context=self.__context)
         amount_of_segments = len(segments)
 
         if (0 < max_lines_to_parse) and (max_lines_to_parse < amount_of_segments):
@@ -49,12 +51,24 @@ class EdifactMSCONSParser:
 
         last_segment_type: Optional[str] = None
         current_segment_group: Optional[str] = None
-        line_number: int = 0
         for segment in segments:
-            line_number = line_number + 1
+            self.__context.segment_count += 1
+            line_number = self.__context.segment_count
+
             segment_line = segment.strip()
             if not segment_line:
                 continue
+            if has_una_segment:
+                # Reset back the flag to continue with other segments
+                has_una_segment = False
+                continue
+
+            segment_line = self.__syntax_parser.remove_invalid_prefix_from_segment_data(
+                string_content=segment_line,
+                segment_types=segment_types,
+                context=self.__context,
+            )
+
             element_components = self.__syntax_parser.split_elements(
                 string_content=segment_line,
                 context=self.__context
@@ -72,7 +86,6 @@ class EdifactMSCONSParser:
                 current_segment_type=segment_type,
                 current_segment_group=current_segment_group
             )
-            self.__context.segment_count += 1
 
             segment_handler = self.__handler_factory.get_handler(segment_type)
             if segment_handler:
@@ -88,12 +101,19 @@ class EdifactMSCONSParser:
 
         return self.__context.interchange
 
-    def __extract_and_process_una_segment(self, edifact_text):
-        # Check for UNA segment at the beginning of the file
+    def __initialize_una_segment_logic_return_if_has_una_segment(self, edifact_text: str) -> bool:
+        una_segment: Optional[str] = None
+        # Check for the UNA segment at the beginning of the text
         if edifact_text.startswith(SegmentType.UNA):
-            # Extract the UNA segment (always 9 characters long)
             una_segment = edifact_text[:EdifactConstants.UNA_SEGMENT_MAX_LENGTH]
+        else:
+            # Check for UNA segment is somewhere in the middle of the text
+            index = edifact_text.find(SegmentType.UNA)
+            if index > 0:
+                logger.warning(f"Removing invalid prefix from UNA segment '{edifact_text[:index]}'")
+                una_segment = edifact_text[index:EdifactConstants.UNA_SEGMENT_MAX_LENGTH]
 
+        if una_segment:
             # Process the UNA segment to set the delimiters
             una_handler = self.__handler_factory.get_handler(SegmentType.UNA)
             if una_handler:
@@ -104,13 +124,7 @@ class EdifactMSCONSParser:
                     current_segment_group=None,
                     context=self.__context
                 )
-
-            # Remove the UNA segment from the text to avoid processing it again
-            # IMPROVEMENT note:
-            # Should we do this or just leave the UNA segment in the text to save processing time?
-            # Since the text can be very long, it might be better to leave it in the text to save processing time.
-            edifact_text = edifact_text[EdifactConstants.UNA_SEGMENT_MAX_LENGTH:]
-        return edifact_text
+        return una_segment is not None
 
     @staticmethod
     def get_segment_group(

@@ -367,10 +367,12 @@ activate UseCase
 UseCase -> Parser: parse(edifact_text, max_lines_to_parse)
 activate Parser
 
-Parser -> Parser: extract_and_process_una_segment()
+Parser -> Parser: __initialize_una_segment_logic_return_if_has_una_segment()
 Parser -> Parser: split_segments()
 
 loop for each segment
+    Parser -> Parser: increment segment_count
+    Parser -> Parser: remove_invalid_prefix_from_segment_data()
     Parser -> Parser: split_elements()
     Parser -> Parser: get_segment_group()
     Parser -> Factory: get_handler(segment_type)
